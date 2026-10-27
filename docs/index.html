@@ -1,117 +1,138 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en-GB">
 <head>
   <meta charset="UTF-8">
-  <title>Clapham Shopfronts</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <style>
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      line-height: 1.6;
-      margin: 0;
-      background: #f7f7f7;
-      color: #222;
-    }
-
-    .container {
-      max-width: 800px;
-      margin: 60px auto;
-      background: #ffffff;
-      padding: 40px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-      border-radius: 8px;
-    }
-
-    h1 {
-      margin-top: 0;
-      font-size: 2.2em;
-    }
-
-    h2 {
-      margin-top: 40px;
-      font-size: 1.4em;
-    }
-
-    p {
-      margin: 16px 0;
-    }
-
-    .footer {
-      margin-top: 40px;
-      font-size: 0.9em;
-      color: #666;
-    }
-
-    a {
-      color: #0066cc;
-      text-decoration: none;
-    }
-
-    a:hover {
-      text-decoration: underline;
-    }
-
-    .tagline {
-      font-size: 1.2em;
-      color: #555;
-    }
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f7f3e9">
+  <meta name="description" content="Documenting the changing shopfronts of Clapham, London. A growing local history project, one shopfront and one story at a time.">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Clapham Shopfronts — Every shopfront has a story">
+  <meta property="og:description" content="A small record of a changing neighbourhood. Documenting the shopfronts of Clapham, London.">
+  <meta property="og:image" content="https://claphamshopfronts.com/images/hero-collage.webp">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="A collage of eight watercolours of Clapham shopfronts and the Clapham High Street sign, taped to cream paper.">
+  <meta name="twitter:card" content="summary_large_image">
+  <title>Clapham Shopfronts — Every shopfront has a story</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div class="container">
-    <h1>Clapham Shopfronts</h1>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header wrap">
+    <a class="wordmark" href="./" aria-label="Clapham Shopfronts home">
+      <svg class="shop-mark" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
+        <path d="M7 20v23h34V20M5 14h38l-3-8H8l-3 8Zm0 0v5a4 4 0 0 0 8 0v-5m0 5a4 4 0 0 0 8 0v-5m0 5a4 4 0 0 0 8 0v-5m0 5a4 4 0 0 0 8 0v-5m0 5a3 3 0 0 0 6 0v-5M12 27h12v10H12V27Zm18 16V27h7v16M4 43h40"/>
+      </svg>
+      <span>Clapham<span>Shopfronts</span></span>
+    </a>
+    <nav aria-label="Main navigation">
+      <a href="#the-project">The project</a>
+      <a href="#contribute">Get involved</a>
+      <a class="instagram-nav" href="https://instagram.com/claphamshopfronts">Follow along <span aria-hidden="true">↗</span></a>
+    </nav>
+  </header>
 
-    <p class="tagline">
-      Documenting the changing shopfronts of Clapham, London.
-    </p>
+  <main id="main">
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="hero-intro wrap">
+        <p class="eyebrow">Clapham, London <span aria-hidden="true">·</span> A local history project</p>
+        <h1 id="hero-title">Every shopfront<br>has a <em>story.</em></h1>
+        <p class="hero-description">Documenting the changing face of our high street.<br class="desktop-break"> The shops, the signs, and what used to be there.</p>
+      </div>
 
-    <h2>About the Project</h2>
-    <p>
-      Clapham Shopfronts is an ongoing project to photograph and document the businesses
-      on the streets of Clapham and how they change over time.
-    </p>
+      <figure class="collage wrap" aria-labelledby="collage-caption">
+        <div class="paintings">
+          <figure class="painting painting-sign">
+            <img src="images/watercolours/street-sign.webp" srcset="images/watercolours/street-sign-small.webp 640w, images/watercolours/street-sign.webp 1448w" sizes="(max-width: 680px) 45vw, (max-width: 1276px) 22vw, 274px" width="1448" height="1086" alt="Pastel watercolour of the Clapham High Street SW4 sign on a brick wall." fetchpriority="high">
+            <figcaption>A little corner of SW4</figcaption>
+          </figure>
+          <figure class="painting">
+            <img src="images/watercolours/jeannette-elvira.webp" srcset="images/watercolours/jeannette-elvira-small.webp 640w, images/watercolours/jeannette-elvira.webp 1448w" sizes="(max-width: 680px) 45vw, (max-width: 1276px) 22vw, 274px" width="1448" height="1086" alt="Watercolour of Jeannette Fashions and Elvira Graham, with faded red and blue shop signs.">
+            <figcaption>Names we remember</figcaption>
+          </figure>
+          <figure class="painting">
+            <img src="images/watercolours/pure-vintage.webp" srcset="images/watercolours/pure-vintage-small.webp 640w, images/watercolours/pure-vintage.webp 1448w" sizes="(max-width: 680px) 45vw, (max-width: 1276px) 22vw, 274px" width="1448" height="1086" alt="Watercolour of Pure Vintage’s blue sign, red door and graffiti-covered shutter.">
+            <figcaption>Pure Vintage</figcaption>
+          </figure>
+          <figure class="painting">
+            <img src="images/watercolours/rattlin-bog.webp" srcset="images/watercolours/rattlin-bog-small.webp 640w, images/watercolours/rattlin-bog.webp 1448w" sizes="(max-width: 680px) 45vw, (max-width: 1276px) 22vw, 274px" width="1448" height="1086" alt="Watercolour of The Rattlin’ Bog’s green pub frontage and the bicycle mounted above it.">
+            <figcaption>The Rattlin’ Bog</figcaption>
+          </figure>
+          <figure class="painting">
+            <img src="images/watercolours/dentons.webp" srcset="images/watercolours/dentons-small.webp 640w, images/watercolours/dentons.webp 1448w" sizes="(max-width: 680px) 45vw, (max-width: 1276px) 22vw, 274px" width="1448" height="1086" alt="Watercolour of Dentons catering equipment, its pale facade and relocation sale notices.">
+            <figcaption>Another chapter</figcaption>
+          </figure>
+          <figure class="painting">
+            <img src="images/watercolours/elements-sushi.webp" srcset="images/watercolours/elements-sushi-small.webp 640w, images/watercolours/elements-sushi.webp 1448w" sizes="(max-width: 680px) 45vw, (max-width: 1276px) 22vw, 274px" width="1448" height="1086" alt="Watercolour of the yellow Elements Sushi shopfront, with posters on the glass doors.">
+            <figcaption>Elements Sushi</figcaption>
+          </figure>
+          <figure class="painting">
+            <img src="images/watercolours/clubhouse.webp" srcset="images/watercolours/clubhouse-small.webp 640w, images/watercolours/clubhouse.webp 1448w" sizes="(max-width: 680px) 45vw, (max-width: 1276px) 22vw, 274px" width="1448" height="1086" alt="Watercolour of the pale blue Clapham’s Clubhouse beneath red-brick gables.">
+            <figcaption>Look up, too</figcaption>
+          </figure>
+          <figure class="painting">
+            <img src="images/watercolours/fruit-and-more.webp" srcset="images/watercolours/fruit-and-more-small.webp 640w, images/watercolours/fruit-and-more.webp 1448w" sizes="(max-width: 680px) 45vw, (max-width: 1276px) 22vw, 274px" width="1448" height="1086" alt="Watercolour of Fruit &amp; More, with a painted shutter and scaffolding overhead.">
+            <figcaption>A high street in transition</figcaption>
+          </figure>
+        </div>
+        <figcaption id="collage-caption" class="collage-caption"><span>Our neighbourhood, in watercolour.</span> Painted interpretations of our own photographs.</figcaption>
+      </figure>
+      <a class="down-link" href="#the-project">A little about the project <span aria-hidden="true">↓</span></a>
+    </section>
 
-    <p>
-      Shops open, close, merge, split, and change use. Over time, this project aims to
-      build a photographic and historical record of those changes — a small archive of
-      a London high street in transition.
-    </p>
+    <section class="project wrap" id="the-project" aria-labelledby="project-title">
+      <div class="project-heading">
+        <p class="eyebrow">Behind the shop windows</p>
+        <h2 id="project-title">An everyday street.<br>An extraordinary<br><em>amount of history.</em></h2>
+        <p class="handwritten">Worth keeping a record of.</p>
+      </div>
+      <div class="project-copy">
+        <p class="lead">A familiar sign comes down. A new name goes up. Before long, we’re asking: “What used to be there?”</p>
+        <p>Clapham Shopfronts is an ongoing project to photograph and document the businesses on the streets of Clapham and how they change over time.</p>
+        <p>Shops open, close, merge, split, and change use. We’re building a photographic and historical record of those changes — a small archive of a London high street in transition.</p>
+        <p class="work-in-progress"><span class="status-dot" aria-hidden="true"></span> The collection is growing. This is just the beginning.</p>
+      </div>
+    </section>
 
-    <h2>What We’re Recording</h2>
-    <ul>
-      <li>New business openings</li>
-      <li>Shop closures</li>
-      <li>Vacant units</li>
-      <li>Refurbishments</li>
-      <li>Before and after comparisons</li>
-      <li>How individual shop units change over time</li>
-    </ul>
+    <section class="recording wrap" aria-labelledby="recording-title">
+      <div class="section-label"><h2 id="recording-title">What we’re keeping an eye on</h2><span aria-hidden="true">A few notes from the pavement</span></div>
+      <ul class="recording-list">
+        <li><span class="list-number" aria-hidden="true">01</span><h3>Coming &amp; going</h3><p>New openings, closing doors, and the vacant units in between.</p></li>
+        <li><span class="list-number" aria-hidden="true">02</span><h3>A fresh coat of paint</h3><p>Refurbishments, new signs, and familiar places finding a new use.</p></li>
+        <li><span class="list-number" aria-hidden="true">03</span><h3>Then &amp; now</h3><p>Before and after photographs, tracing the story of each shop unit.</p></li>
+      </ul>
+    </section>
 
-    <h2>Follow the Project</h2>
-    <p>
-      Follow the project on Instagram:<br>
-      <a href="https://instagram.com/claphamshopfronts">
-        instagram.com/claphamshopfronts
-      </a>
-    </p>
+    <section class="noticeboard wrap" id="contribute" aria-labelledby="contribute-title">
+      <div class="contribute-note">
+        <p class="eyebrow">Local memories wanted</p>
+        <h2 id="contribute-title">Remember what<br><em>used to be here?</em></h2>
+        <p>An old photograph. A shop you grew up visiting. A name you haven’t thought about in years. If you have a piece of Clapham’s shopfront history, we’d love to hear from you.</p>
+        <a class="email-link" href="mailto:hello@claphamshopfronts.com">hello@claphamshopfronts.com <span aria-hidden="true">↗</span></a>
+      </div>
+      <aside class="follow-note" aria-labelledby="follow-title">
+        <p class="handwritten">Meanwhile, on the high street…</p>
+        <h2 id="follow-title">Follow along</h2>
+        <p>Find our latest photographs and follow the collection as it grows on Instagram.</p>
+        <a href="https://instagram.com/claphamshopfronts">
+          <svg class="instagram-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true" focusable="false">
+            <rect x="3" y="3" width="18" height="18" rx="5"/>
+            <circle cx="12" cy="12" r="4.2"/>
+            <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/>
+          </svg>
+          @claphamshopfronts <span aria-hidden="true">↗</span>
+        </a>
+      </aside>
+    </section>
+  </main>
 
-    <h2>Contribute</h2>
-    <p>
-      If you have old photos of shopfronts in Clapham, or information about what used to
-      be where, we would love to hear from you.
-    </p>
-
-    <p>
-      Contact: <a href="mailto:hello@claphamshopfronts.com">hello@claphamshopfronts.com</a>
-    </p>
-
-    <div class="footer">
-      <p>
-        &copy; 2026 Clapham Shopfronts<br>
-        A local history and documentation project.
-      </p>
-    </div>
-  </div>
+  <footer class="site-footer wrap">
+    <p>© 2026 Clapham Shopfronts</p>
+    <p>A small record of a changing neighbourhood.</p>
+    <a href="#main">Back to the top <span aria-hidden="true">↑</span></a>
+  </footer>
 </body>
 </html>
