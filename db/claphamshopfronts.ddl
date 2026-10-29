@@ -31,6 +31,7 @@ CREATE TABLE units (
   id                  INTEGER PRIMARY KEY,
   site_id             INTEGER NOT NULL REFERENCES sites(id) ON DELETE RESTRICT,
   unit_code           TEXT NOT NULL UNIQUE,   -- e.g. CHS0001-U01
+  slug                TEXT NOT NULL UNIQUE,   -- e.g. sw4-7ts-7; assigned once
   label               TEXT,                   -- human-readable label if useful
   valid_from          TEXT NOT NULL,          -- ISO date: YYYY-MM-DD
   valid_to            TEXT,                   -- NULL = still current
@@ -156,6 +157,7 @@ CREATE INDEX idx_occupancies_valid_to ON occupancies(valid_to);
 CREATE TABLE observations (
   id                    INTEGER PRIMARY KEY,
   unit_id               INTEGER NOT NULL REFERENCES units(id) ON DELETE RESTRICT,
+  business_id           INTEGER REFERENCES businesses(id) ON DELETE SET NULL,
   observed_on           TEXT NOT NULL,
   observer              TEXT,
   observed_status       TEXT NOT NULL,
@@ -174,6 +176,7 @@ CREATE TABLE observations (
 );
 
 CREATE INDEX idx_observations_unit_id ON observations(unit_id);
+CREATE INDEX idx_observations_business_id ON observations(business_id);
 CREATE INDEX idx_observations_date ON observations(observed_on);
 
 ----------------------------------------------------------------------
@@ -317,4 +320,7 @@ BEGIN
      SET updated_at = CURRENT_TIMESTAMP
    WHERE id = NEW.id;
 END;
+
+-- Schema version 2: unique, stored address-based slugs for units.
+PRAGMA user_version = 2;
 

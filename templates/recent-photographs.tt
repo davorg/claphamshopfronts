@@ -1,0 +1,26 @@
+    <section class="recent-photographs wrap" id="recent-photographs" aria-labelledby="recent-title">
+      <div class="archive-section-heading">
+        <div>
+          <p class="eyebrow">From the photographic archive</p>
+          <h2 id="recent-title">Recent photographs</h2>
+        </div>
+        <p class="handwritten">One shopfront at a time.</p>
+      </div>
+      <p class="recent-intro">The latest photographs in our growing collection, with a little of each shopfront’s story.</p>
+      <ul class="recent-photo-list">
+[% FOREACH photo IN photos -%]
+        <li>
+          <a class="recent-photo-card" href="[% photo.page_url | html %]">
+            <img src="[% photo.small_url | html %]" width="[% photo.small_width | html %]" height="[% photo.small_height | html %]" alt="[% photo.caption | html %]" loading="lazy">
+            <div class="recent-photo-copy">
+              <time datetime="[% photo.taken_on | html %]">[% photo.photograph_date | html %]</time>
+              <h3>[% photo.display_name | html %]</h3>
+              <p>[% photo.street_address | html %]</p>
+              <p class="recent-photo-state">[% photo.status_label | html %] when photographed</p>
+              <span class="recent-photo-link">See this shopfront <span aria-hidden="true">↗</span></span>
+            </div>
+          </a>
+        </li>
+[% END -%]
+      </ul>
+    </section>

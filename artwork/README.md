@@ -10,14 +10,14 @@ A [flattened collage](../docs/images/hero-collage.webp) is also saved at 1200 ×
 
 | Painting | Source photograph | Finished artwork |
 | --- | --- | --- |
-| the Clapham High Street SW4 street plaque and its brick wall | [PXL_20260325_090616630.jpg](../pics/PXL_20260325_090616630.jpg) | [street-sign.webp](../docs/images/watercolours/street-sign.webp) |
-| Dentons catering equipment with the pale upper facade, black shutter and relocation-sale windows | [PXL_20260403_065840506.jpg](../pics/PXL_20260403_065840506.jpg) | [dentons.webp](../docs/images/watercolours/dentons.webp) |
-| Pure Vintage with the blue fascia, graffiti-covered shutter and red door | [PXL_20260403_065904338.jpg](../pics/PXL_20260403_065904338.jpg) | [pure-vintage.webp](../docs/images/watercolours/pure-vintage.webp) |
-| Jeannette Fashions and Elvira Graham side by side, red and turquoise fascias below the old brick facade | [PXL_20260403_070044822.MP.jpg](../pics/PXL_20260403_070044822.MP.jpg) | [jeannette-elvira.webp](../docs/images/watercolours/jeannette-elvira.webp) |
-| the pale blue Clapham's Clubhouse frontage and the red-brick gabled buildings behind it | [PXL_20260403_070220410.MP.jpg](../pics/PXL_20260403_070220410.MP.jpg) | [clubhouse.webp](../docs/images/watercolours/clubhouse.webp) |
-| Elements Sushi with the yellow shopfront and poster-covered glass doors | [PXL_20260403_070357526.jpg](../pics/PXL_20260403_070357526.jpg) | [elements-sushi.webp](../docs/images/watercolours/elements-sushi.webp) |
-| Fruit & More with its grey sign, graffiti shutter and scaffolding above | [PXL_20260403_070428171.MP.jpg](../pics/PXL_20260403_070428171.MP.jpg) | [fruit-and-more.webp](../docs/images/watercolours/fruit-and-more.webp) |
-| The Rattlin' Bog pub with its green frontage, elaborate display window and bicycle mounted above | [PXL_20260403_071036649.jpg](../pics/PXL_20260403_071036649.jpg) | [rattlin-bog.webp](../docs/images/watercolours/rattlin-bog.webp) |
+| the Clapham High Street SW4 street plaque and its brick wall | [PXL_20260325_090616630.jpg](../pics/incoming/PXL_20260325_090616630.jpg) | [street-sign.webp](../docs/images/watercolours/street-sign.webp) |
+| Dentons catering equipment with the pale upper facade, black shutter and relocation-sale windows | [PXL_20260403_065840506.jpg](../pics/incoming/PXL_20260403_065840506.jpg) | [dentons.webp](../docs/images/watercolours/dentons.webp) |
+| Pure Vintage with the blue fascia, graffiti-covered shutter and red door | [PXL_20260403_065904338.jpg](../pics/processed/PXL_20260403_065904338.jpg) | [pure-vintage.webp](../docs/images/watercolours/pure-vintage.webp) |
+| Jeannette Fashions and Elvira Graham side by side, red and turquoise fascias below the old brick facade | [PXL_20260403_070044822.MP.jpg](../pics/incoming/PXL_20260403_070044822.MP.jpg) | [jeannette-elvira.webp](../docs/images/watercolours/jeannette-elvira.webp) |
+| the pale blue Clapham's Clubhouse frontage and the red-brick gabled buildings behind it | [PXL_20260403_070220410.MP.jpg](../pics/incoming/PXL_20260403_070220410.MP.jpg) | [clubhouse.webp](../docs/images/watercolours/clubhouse.webp) |
+| Elements Sushi with the yellow shopfront and poster-covered glass doors | [PXL_20260403_070357526.jpg](../pics/incoming/PXL_20260403_070357526.jpg) | [elements-sushi.webp](../docs/images/watercolours/elements-sushi.webp) |
+| Fruit & More with its grey sign, graffiti shutter and scaffolding above | [PXL_20260403_070428171.MP.jpg](../pics/incoming/PXL_20260403_070428171.MP.jpg) | [fruit-and-more.webp](../docs/images/watercolours/fruit-and-more.webp) |
+| The Rattlin' Bog pub with its green frontage, elaborate display window and bicycle mounted above | [PXL_20260403_071036649.jpg](../pics/incoming/PXL_20260403_071036649.jpg) | [rattlin-bog.webp](../docs/images/watercolours/rattlin-bog.webp) |
 
 ## Final prompts
 

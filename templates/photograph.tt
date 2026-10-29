@@ -1,0 +1,9 @@
+      <figure class="archive-photograph" id="photo-[% photo.id | html %]">
+        <a class="archive-image-link" href="[% photo.image_url | html %]" data-photo-modal="photo-modal" data-photo-name="[% photo.business_name | html %]" data-photo-alt="[% photo.caption | html %]" data-photo-width="[% photo.image_width | html %]" data-photo-height="[% photo.image_height | html %]" aria-haspopup="dialog" aria-label="View the larger photograph of [% photo.business_name | html %]">
+          <img src="[% photo.image_url | html %]" srcset="[% photo.small_url | html %] [% photo.small_width | html %]w, [% photo.image_url | html %] [% photo.image_width | html %]w" sizes="(max-width: 760px) 90vw, (max-width: 1276px) 48vw, 560px" width="[% photo.image_width | html %]" height="[% photo.image_height | html %]" alt="[% photo.caption | html %]" [% IF eager %]fetchpriority="high"[% ELSE %]loading="lazy"[% END %]>
+        </a>
+        <figcaption>
+          <span>[% photo.business_name | html %] · <time datetime="[% photo.taken_on | html %]">[% photo.photograph_date | html %]</time>[% IF photo.attribution %] · [% photo.attribution | html %][% END %]</span>
+          <a href="[% photo.image_url | html %]" data-photo-modal="photo-modal" data-photo-name="[% photo.business_name | html %]" data-photo-alt="[% photo.caption | html %]" data-photo-width="[% photo.image_width | html %]" data-photo-height="[% photo.image_height | html %]" aria-haspopup="dialog">View larger <span aria-hidden="true">↗</span></a>
+        </figcaption>
+      </figure>

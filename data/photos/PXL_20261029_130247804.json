@@ -1,0 +1,38 @@
+{
+  "original": "PXL_20261029_130247804.jpg",
+  "original_sha256": "ecae53f58756746b0dc86a6cde4d7cc3a8e3c042ff2096f2c9fd7b764a46a2f0",
+  "taken_on": "2026-10-29",
+  "site": {
+    "site_code": "CHS0001",
+    "street_address": "7 Clapham High Street, London",
+    "postcode": "SW4 7TS",
+    "notes": "The project owner confirms this is the same location as the April Pure Vintage photograph. The salon website lists 7 Clapham High Street, SW4 7TS: https://www.tonyvoyage.com/ ."
+  },
+  "unit": {
+    "unit_code": "CHS0001-U01",
+    "label": "Ground-floor shop at 7 Clapham High Street",
+    "frontage_notes": "The same shop opening and adjacent red door are visible. A new fascia and fitted salon are a change of occupant; no split or merger of the unit is established."
+  },
+  "business": {
+    "name": "Tony Voyage",
+    "normalised_name": "tony voyage",
+    "type": "Hair salon",
+    "is_chain": 1,
+    "website": "https://www.tonyvoyage.com/",
+    "notes": "Observed at 7 Clapham High Street, London SW4 7TS on 2026-10-29. The fascia reads TONY VOYAGE HAIR SALON and advertises www.tonyvoyage.com. The business website lists salons at this address and Union Road; is_chain = 1 records that multi-site presence. Source: https://www.tonyvoyage.com/ (checked 2026-10-29). The opening date at this address is unknown; 2026-10-29 is the first observation in this archive, not an opening date."
+  },
+  "observation": {
+    "status": "occupied",
+    "name_as_displayed": "Tony Voyage",
+    "confidence": "high",
+    "observer": null,
+    "notes": "The project owner took this photograph today and confirms it shows the former Pure Vintage location. The fascia reads TONY VOYAGE HAIR SALON; the photograph shows a fitted, illuminated salon behind a glass frontage. Recorded occupied by the salon on this date. This does not establish when it opened. The red door and shop opening support retaining the existing unit; a split or merger is not evidenced."
+  },
+  "occupancy_notes": "Tony Voyage Hair Salon first documented at this unit on 2026-10-29. This is an observation date, not the opening or handover date. The previous photograph establishes vacancy on 2026-04-03. The transition occurred at an unknown time after that observation and no later than this one; the archive leaves the intervening period undetermined.",
+  "photo": {
+    "source_url": null,
+    "attribution": null,
+    "caption": "Tony Voyage Hair Salon at 7 Clapham High Street, London SW4 7TS, photographed on 29 October 2026. The cream salon sign and glass frontage replace the blue Pure Vintage fascia and shuttered appearance documented in April.",
+    "notes": "EXIF DateTimeOriginal is 2026:10:29 13:02:47 with OffsetTimeOriginal +00:00. The project owner confirms this was taken today at the same location as the Pure Vintage photograph. Camera GPS is not a verified coordinate of the premises. Photographer credit and a post URL for this particular photograph have not been supplied."
+  }
+}

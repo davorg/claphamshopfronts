@@ -8,9 +8,11 @@ The files are:
 | --- | --- |
 | [`db/claphamshopfront.db`](db/claphamshopfront.db) | The SQLite database. Note the singular `shopfront` in its filename. |
 | [`db/claphamshopfronts.ddl`](db/claphamshopfronts.ddl) | SQL defining the tables, indexes, views, and triggers. |
-| [`db.png`](db.png) | The original diagram of the tables and their columns. |
+| [`db.png`](db.png) | The original version-0 diagram. The Mermaid diagram below includes the newer observation-to-business link and unit slug. |
 
-On inspection on 27 October 2026, the database schema matched the DDL: **11 tables, 4 views, 4 triggers, and 19 explicitly defined indexes**, plus SQLite’s automatic indexes for unique constraints and composite primary keys. All tables were empty. SQLite’s integrity check returned `ok`, and its foreign-key check found no violations. The examples below illustrate intended use rather than existing records.
+On inspection on 27 October 2026, the database schema matched the DDL: **11 tables, 4 views, 4 triggers, and 19 explicitly defined indexes**, plus SQLite’s automatic indexes for unique constraints and composite primary keys. All tables were empty. SQLite’s integrity check returned `ok`, and its foreign-key check found no violations. That was the initial state; the populated records and updated schema are described below.
+
+Two photographs of 7 Clapham High Street have now been imported: [Pure Vintage, vacant on 3 April 2026](data/photos/PXL_20260403_065904338.json), and [Tony Voyage Hair Salon, occupied on 29 October 2026](data/photos/PXL_20261029_130247804.json). There is one site and one unit, with two business types, businesses, observations, occupancies, and photos. The other tables remain empty. Schema version 1 added an optional `business_id` to observations and one index, bringing the explicit index count to 20. Schema version 2 adds a required, unique `units.slug` for stable public URLs. The reviewed import manifests preserve the evidence and uncertainties.
 
 ## The central idea: location, unit, and occupant
 
@@ -37,6 +39,7 @@ erDiagram
     business_types |o--o{ businesses : classifies
     businesses |o--o{ occupancies : "occupies through"
     units ||--o{ observations : "is observed"
+    businesses |o--o{ observations : "identified on frontage"
     units |o--o{ photos : "is pictured"
     observations |o--o{ photos : "is documented by"
     units ||--o{ unit_relationships : "predecessor: from_unit_id"
@@ -55,6 +58,7 @@ erDiagram
         INTEGER id PK
         INTEGER site_id FK
         TEXT unit_code UK
+        TEXT slug UK
         TEXT valid_from
         TEXT valid_to
     }
@@ -86,6 +90,7 @@ erDiagram
     observations {
         INTEGER id PK
         INTEGER unit_id FK
+        INTEGER business_id FK
         TEXT observed_on
         TEXT observed_status
     }
@@ -128,6 +133,8 @@ One site can have multiple units, including successive historical configurations
 ### `units`: physical shop configurations
 
 Each unit belongs to exactly one site through `site_id`. It has a required, unique `unit_code`, such as `CHS0001-U01`, and an optional human-readable `label`.
+
+Its required, unique `slug` forms the public URL, for example `sw4-7ts-7` in `/shopfronts/sw4-7ts-7/`. This combines a normalised postcode and street number, preserving suffixes (`7a`) and ranges (`7-9`). It is assigned once and stored, so business changes or address corrections do not silently change the URL. Internal unit codes remain separate. Shared or unusual addresses can supply an explicit manifest `unit.slug`, such as `sw4-7ts-7-u2`; collisions require an explicit choice. See [Unit URLs](README.md#unit-urls).
 
 `valid_from` and `valid_to` describe when that configuration exists. A null `valid_to` means it remains current. `frontage_notes` describe its physical features or changes.
 
@@ -193,13 +200,15 @@ When the occupant or state changes, end the previous period and insert a new one
 
 ### `observations`: what was seen on a particular date
 
-Each observation belongs to a unit and records an `observed_on` date, an `observed_status`, and optionally the `observer`, `observed_business_name`, and `notes`.
+Each observation belongs to a unit and records an `observed_on` date, an `observed_status`, and optionally a `business_id`, `observer`, `observed_business_name`, and `notes`.
+
+`business_id` identifies the business associated with that dated observation; it does not, by itself, mean the business was trading. In April, the vacant frontage still identified Pure Vintage; in October, the occupied salon identified Tony Voyage. `observed_business_name` preserves the name as seen. Linking the canonical business record lets each photograph retain its own identity and category even after the latest occupant changes.
 
 `observed_status` uses the same five values as occupancy status. `confidence` must be `high`, `medium`, or `low`, and defaults to `high`.
 
 Observations preserve the evidence separately from the occupancy timeline inferred from it. For example, seeing an empty shop on a particular day establishes its observed state that day; it does not necessarily establish the date the previous business closed.
 
-There is no direct foreign key from an observation to an occupancy, and inserting an observation does not automatically create or update an occupancy.
+There is no direct foreign key from an observation to an occupancy. Inserting an observation directly does not trigger an occupancy update; the importer performs the related timeline operations explicitly in the same transaction.
 
 ### `photos`: photographic evidence and its source
 
@@ -207,14 +216,22 @@ The database stores photo metadata and references, rather than image bytes.
 
 - `taken_on`: required date of the photograph, distinct from the date the record was created.
 - `source_type`: required; one of `own_photo`, `street_view`, `submitted`, or `archive`.
-- `filename`: optional reference to a local image file.
+- `filename`: optional image-file reference; the project convention for new imports is a path relative to the published image root, as described below.
 - `source_url`: optional reference to an external source.
 - `attribution`, `caption`, `notes`: optional descriptive and source information.
 - `unit_id`, `observation_id`: independent, optional links to the subject unit and an observation the photo supports.
 
 A photo can be associated with a unit, an observation, both, or neither while it awaits identification. If both links are supplied, the database does not check that the photo’s unit matches the observation’s unit. It also does not require either a filename or a source URL, or check whether a file or URL exists.
 
-Each photo can directly reference at most one unit and one observation. There is no linking table for a photograph covering several units. The image files in `pics/` are not automatically registered in this table.
+Each photo can directly reference at most one unit and one observation. There is no linking table for a photograph covering several units. Originals in `pics/incoming/` await ingestion; move them to `pics/processed/` only after their database record has been saved and their website copies generated. The image files are not automatically registered in this table. See [Photograph intake](pics/README.md) for the workflow.
+
+Images are initially stored in this repository, with a future move to AWS at `https://images.claphamshopfronts.com/`. Store a relative path such as `photos/2026/04/PXL_20260403_065904338.webp` in `filename`; the page generator adds the configured image base (`/images/` initially, set in `data/site.json`). This keeps the database independent of the host. Keep Instagram links to the photograph itself in `source_url`, and use `source_type = 'own_photo'` for the project’s own photographs. Links that only provide evidence about a business belong in its notes instead. This is a storage convention, not a schema constraint. See [Photograph storage](README.md#photograph-storage) for the URL mapping.
+
+For the Pure Vintage pilot, the opening date of 31 January 2025 is retained as an unverified, user-reported inference from an Instagram reel. The project owner confirms permanent closure by the photo date of 3 April 2026, but the exact closing date is unknown. The occupancy therefore records vacancy first observed on 3 April, with a null `business_id` and the retained sign in `name_as_displayed`; it does not invent a dated trading period. The former business, category, profile, source links, and uncertainties are preserved in the manifest and notes. The unit's `valid_from` likewise marks its first directly observed configuration in this archive. Neither date establishes when the physical unit was created or the business closed. Photographer credit and a post URL for this particular photo remain unset.
+
+The later October photo reuses the same site and unit and identifies Tony Voyage through its observation's `business_id`. The new occupied period has `business_id` set to Tony Voyage. The older vacancy ends on 3 April, its last confirmed observation; the new occupied period begins on 29 October, its first confirmed observation. Neither boundary is an actual handover date. There is no established occupancy record covering the intervening months.
+
+The [Perl page generator](bin/build-site.pl) reads the database through DBIx::Class without modifying it, then renders Template Toolkit templates. A page leads with its latest photograph and identified business while retaining earlier photographs, their own business identities, and their dates. [`data/site.json`](data/site.json) selects published units and curates reported events and confirmed closures for specific businesses and dates. It no longer chooses one business identity for every photograph at an address. Homepage cards link to the matching photo on the same enduring unit page. See [Generate the website](README.md#generate-the-website) for the publication workflow.
 
 ### `tags`, `unit_tags`, and `business_tags`: flexible labels
 
@@ -228,7 +245,11 @@ Although the DDL’s comments mention tagging photographs as a possible use, the
 
 Historical dates are stored as `TEXT`, intended to use ISO format `YYYY-MM-DD`. For units and occupancies, `valid_from` is required and `valid_to` may be null. A check constraint prevents a non-null `valid_to` from sorting before `valid_from`.
 
-The schema does not validate date formatting, define whether an end date is inclusive or exclusive, or prevent overlapping periods. Data-entry code should use consistent date and boundary conventions, keep occupancy periods within their unit’s lifetime, and avoid multiple ongoing occupancies for one unit.
+The schema does not validate date formatting, define whether an end date is inclusive or exclusive, or prevent overlapping periods. The importer validates ISO dates and chronological imports, checks the existing current period, and avoids multiple ongoing occupancies for one unit.
+
+For occupancy records, the project uses **inclusive evidence bounds**: `valid_from` is the first observation supporting a state, and a non-null `valid_to` is the last supporting observation before a different state is documented. A single supported day can have equal start and end dates. An open end identifies the latest known state. This convention does not assert that a business opened or closed on those dates. When the state changes after a gap in observations, leave that gap unrecorded rather than extending the old state to the day before the new photograph. An absent historical record means the state is undetermined, not automatically vacant.
+
+The importer reuses an occupancy for later observations of the same status and occupied business. A changed status or business starts a new period, closing the previous one at its last observation. Backdated observations, conflicting same-day states, and inconsistent existing data stop for manual review. These are application rules, not additional SQLite constraints.
 
 The four views provide convenient joined queries:
 
@@ -258,14 +279,20 @@ With enforcement enabled, deletion behaves as follows:
 | Delete a site that still has units | Blocked by `ON DELETE RESTRICT`. |
 | Delete a unit referenced by occupancies, observations, or either end of a unit relationship | Blocked by `ON DELETE RESTRICT`. |
 | Delete a business type | Its businesses remain, with `business_type_id` set to null. |
-| Delete a business | Its occupancies remain, with `business_id` set to null; its tag links are deleted. |
+| Delete a business | Its occupancies and observations remain, with their `business_id` set to null; its tag links are deleted. |
 | Delete an otherwise deletable unit | Photo references to it become null; its unit-tag links are deleted. |
 | Delete an observation | Its photos remain, with `observation_id` set to null. |
 | Delete a tag | Its unit-tag and business-tag links are deleted. |
 
 Most main tables have `created_at`, defaulting to SQLite’s `CURRENT_TIMESTAMP` in UTC. `sites`, `units`, `businesses`, and `occupancies` also have `updated_at`, refreshed by four `AFTER UPDATE` triggers. These timestamps describe database record maintenance, rather than the historical dates being documented. The other tables have no automatic update timestamp; `tags` and the two tag-link tables have no timestamps at all.
 
-The 19 explicit indexes support address and business-name lookups, common foreign-key joins, status filtering, and date searches. Unique constraints additionally protect site and unit codes, normalised business names, business-type names, tag names, and tag associations.
+The 20 explicit indexes support address and business-name lookups, common foreign-key joins, status filtering, and date searches. Unique constraints additionally protect site and unit codes, unit slugs, normalised business names, business-type names, tag names, and tag associations.
+
+## Schema migration
+
+The DDL creates schema version 2, recorded in SQLite's persistent `PRAGMA user_version`. The [migration command](bin/migrate-db.pl) upgrades version-0 and version-1 databases transactionally. It assigns each unit an address slug, using explicit `unit.slug` values from reviewed import manifests where supplied. Ambiguous or unusable addresses stop the migration for an explicit choice. The units table is rebuilt to enforce the same `NOT NULL` and `UNIQUE` constraints as a fresh database, preserving existing IDs, fields, timestamps, dependent rows, indexes, triggers, and views. Foreign keys are checked before committing.
+
+A version-0 upgrade also adds `observations.business_id` and its index, then links existing photo observations to businesses only when reviewed import manifests match the unit, photograph date, observation date, and original checksum. A repeat migration does not alter the data. Earlier DDL is retained in `t/fixtures/schema-v0.sql` and `t/fixtures/schema-v1.sql` for migration tests. Application connections require version 2; fresh databases created from the current DDL already satisfy that requirement.
 
 ## A typical recording workflow
 
@@ -326,4 +353,4 @@ WHERE p.unit_id = :unit_id OR o.unit_id = :unit_id
 ORDER BY p.taken_on, p.id;
 ```
 
-Here `:unit_id` is a parameter to bind to the numeric unit ID. All four examples currently return no rows because the database has not yet been populated.
+Here `:unit_id` is a parameter to bind to the numeric unit ID. The current-occupancy query returns Tony Voyage's occupied state from 29 October 2026. The history query returns the earlier vacancy and the later salon period. The lineage query returns no rows because the physical unit has not split or merged. With `:unit_id` set to `1`, the photo query returns both photographs. The vacancy's `business_name` and `business_type` remain null in occupancy queries, while its photo's observation independently identifies Pure Vintage.

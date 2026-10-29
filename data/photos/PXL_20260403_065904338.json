@@ -1,0 +1,38 @@
+{
+  "original": "PXL_20260403_065904338.jpg",
+  "original_sha256": "6641068473099395ebcb7a5544c4deb086f4c0b51cc970ee5f62c2388cee1624",
+  "taken_on": "2026-04-03",
+  "site": {
+    "site_code": "CHS0001",
+    "street_address": "7 Clapham High Street, London",
+    "postcode": "SW4 7TS",
+    "notes": "Address supplied by the project owner on 2026-10-29 and corroborated by the local BID directory: https://www.thisisclapham.co.uk/business/pure-vintage/ . Site coordinates are unset: the photograph's GPS is the camera position across the road, not a verified location of the premises."
+  },
+  "unit": {
+    "unit_code": "CHS0001-U01",
+    "label": "Ground-floor shop at 7 Clapham High Street",
+    "frontage_notes": "Blue PURE VINTAGE fascia, graffiti-covered roller shutter and adjacent red door; a To Let board is visible above. This configuration is directly documented on 2026-04-03. valid_from records the first observation in this archive, not the date the unit was built or reconfigured."
+  },
+  "business": {
+    "name": "Pure Vintage",
+    "normalised_name": "pure vintage",
+    "type": "Second-hand clothing shop",
+    "is_chain": 1,
+    "website": "https://www.instagram.com/purevintage_clapham/",
+    "notes": "Former business at site CHS0001, unit CHS0001-U01 (7 Clapham High Street, London SW4 7TS). The project owner identifies it as a second-hand clothing shop; the name does not establish that all stock was vintage.\nThe project owner confirms Pure Vintage had permanently closed by the photograph on 2026-04-03. Its exact closing date is unknown.\nReported opening date: 2025-01-31, inferred by the project owner from https://www.instagram.com/reel/DFfRiCyI0eF/ . The reel could not be independently retrieved on 2026-10-29; retain this as an unverified report, not a confirmed opening date.\nInstagram profile supplied by the project owner: https://www.instagram.com/purevintage_clapham/ . Stored as its known web presence, not a verified standalone website.\nMulti-site classification (is_chain = 1) is an inference from the local BID directory, which describes Brick Lane and Clapham locations: https://www.thisisclapham.co.uk/business/pure-vintage/ . This does not establish how many branches were trading on the photograph date."
+  },
+  "observation": {
+    "status": "vacant",
+    "name_as_displayed": "Pure Vintage",
+    "confidence": "high",
+    "observer": null,
+    "notes": "The project owner confirms Pure Vintage had permanently closed by the photograph on 2026-04-03. Its exact closing date is unknown. The retained shop sign does not mean the business was still trading. Vacancy is recorded from the owner's closure confirmation together with the shuttered frontage and To Let board."
+  },
+  "occupancy_notes": "Vacancy documented on 2026-04-03; this is the first observed vacancy date, not an exact closure date or a claim about the premises today. Former occupant: Pure Vintage, a second-hand clothing shop. The project owner confirms Pure Vintage had permanently closed by the photograph on 2026-04-03. Its exact closing date is unknown. Reported opening date: 2025-01-31, inferred by the project owner from https://www.instagram.com/reel/DFfRiCyI0eF/ . The reel could not be independently retrieved on 2026-10-29; retain this as an unverified report, not a confirmed opening date. No precisely dated historical occupied period has been created. The retained fascia is recorded in name_as_displayed; business_id is null because Pure Vintage was not trading in this vacant period.",
+  "photo": {
+    "source_url": null,
+    "attribution": null,
+    "caption": "The former Pure Vintage second-hand clothing shop at 7 Clapham High Street, London SW4 7TS, photographed on 3 April 2026 after its permanent closure. The blue shop sign remains above a graffiti-covered shutter.",
+    "notes": "The date and local capture time come from EXIF DateTimeOriginal and OffsetTimeOriginal. The original phone filename uses UTC; the EXIF time is 07:59:04 +01:00. Address, business category and closure by this date were supplied by the project owner. Photographer credit and a post URL for this particular photograph have not yet been supplied. The opening-date reel is evidence about the former business, not the source of this photograph."
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "site_url": "https://claphamshopfronts.com",
+  "image_base": "/images/",
+  "shopfronts": [
+    {
+      "unit_code": "CHS0001-U01",
+      "confirmed_closures": [
+        {
+          "business_normalised_name": "pure vintage",
+          "observed_on": "2026-04-03"
+        }
+      ],
+      "reported_events": [
+        {
+          "date": "2025-01-31",
+          "title": "Pure Vintage: reported opening",
+          "description": "An Instagram reel shared with the project suggests Pure Vintage opened on this date. It has not yet been independently confirmed.",
+          "source_url": "https://www.instagram.com/reel/DFfRiCyI0eF/",
+          "source_label": "Opening-date reel on Instagram"
+        }
+      ]
+    }
+  ]
+}
