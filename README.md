@@ -123,6 +123,8 @@ The complete [All photos gallery](docs/photos/index.html) is generated at `/phot
 
 Page content is maintained in `templates/shopfront.tt`, the reusable `templates/photograph.tt`, `templates/recent-photographs.tt`, and `templates/all-photos.tt`. Generated pages reuse the homepage's head, navigation, and footer, including its fonts, analytics, and project credit. After changing those shared homepage elements, rebuild to propagate them. Styling stays in `docs/styles.css`.
 
+`ClaphamShopfronts::Site->build` coordinates private methods for loading records, preparing photo and unit-page data, grouping shared archive images, rendering pages and applying the output plan. All assets and rendered pages are validated before the output method writes any files, so a missing image, invalid record or template error leaves existing pages unchanged.
+
 On a shopfront page, clicking any photograph or its “View larger” link opens that photograph in a native dialog carousel. Previous/next buttons and the left/right arrow keys browse all photographs of that unit, newest first, wrapping at either end. Each slide shows its business name, date, photographer credit where available, and position in the set. Navigation buttons are hidden for a single photograph. Close it with ×, Escape, or the backdrop; keyboard focus returns to the original link, even after browsing. Without JavaScript, these links still open the image directly. The enhancement is in `docs/photo-modal.js`.
 
 Check whether generated output needs rebuilding without writing files:

@@ -4,7 +4,7 @@ no warnings 'experimental::try';
 use utf8;
 use Test::More;
 use lib 'lib', 't/lib';
-use ClaphamTest qw(fixture seed_page);
+use ClaphamTest qw(fixture seed_page snapshot);
 use ClaphamShopfronts::Site;
 use ClaphamShopfronts::Util qw(file_sha);
 
@@ -105,6 +105,31 @@ subtest 'missing image stops the build before output changes' => sub {
 
   ok !$root->child('docs/shopfronts/sw4-7ts-7/index.html')->exists, 'no partial shopfront page';
   is $root->child('docs/index.html')->slurp_raw, $home, 'homepage unchanged';
+};
+
+subtest 'a late template failure preserves the complete existing output' => sub {
+  my ($root, $schema) = fixture();
+  my $photo = seed_page($root, $schema);
+
+  ClaphamShopfronts::Site->new(root => $root)->build;
+  $photo->update({
+    caption => 'A revised caption that needs publishing.'
+  });
+  $schema->storage->disconnect;
+
+  # The gallery renders after unit pages have already been prepared in memory.
+  $root->child('templates/all-photos.tt')->append_utf8('[% missing_archive_value %]');
+
+  my $before = snapshot($root);
+
+  try {
+    ClaphamShopfronts::Site->new(root => $root)->build;
+    fail 'invalid gallery template rejected';
+  } catch ($error) {
+    like "$error", qr/missing_archive_value/, 'invalid gallery template rejected';
+  }
+
+  is_deeply snapshot($root), $before, 'late rendering failure leaves all pages and database bytes unchanged';
 };
 
 subtest 'recent photos sort by capture date, not insertion order' => sub {
