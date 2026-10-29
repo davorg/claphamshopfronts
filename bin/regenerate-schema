@@ -1,0 +1,65 @@
+#!/usr/bin/env perl
+
+use v5.36;
+use feature 'try';
+no warnings 'experimental::try';
+use FindBin;
+use lib "$FindBin::Bin/../lib";
+use Getopt::Long qw(GetOptions);
+use File::Temp qw(tempfile);
+use Path::Tiny qw(path);
+use DBI;
+use DBD::SQLite::Constants qw(SQLITE_OPEN_READONLY);
+use DBIx::Class::Schema::Loader qw(make_schema_at);
+
+my $help;
+
+GetOptions('help' => \$help) or die "Use --help for usage\n";
+
+if ($help) {
+  say 'Usage: bin/regenerate-schema';
+  say 'Regenerate DBIC classes from the DDL without changing the populated database.';
+  exit 0;
+}
+
+die "Unexpected arguments\n" if @ARGV;
+
+my $root = path($FindBin::Bin)->parent;
+
+try {
+  my $ddl = $root->child('db/claphamshopfronts.ddl')->slurp_utf8;
+  my ($handle, $database) = tempfile(
+    'claphamshopfronts-schema-XXXXXX',
+    SUFFIX => '.sqlite',
+    TMPDIR => 1,
+    UNLINK => 1,
+  );
+  close $handle or die "Cannot close temporary database file: $!\n";
+
+  my $dbh = DBI->connect("dbi:SQLite:dbname=$database", '', '', {
+    RaiseError                       => 1,
+    PrintError                       => 0,
+    sqlite_allow_multiple_statements => 1,
+  });
+
+  $dbh->do($ddl);
+  $dbh->disconnect;
+
+  make_schema_at(
+    'ClaphamShopfronts::Schema', {
+      dump_directory => "" . $root->child('lib'),
+      naming         => 'current',
+      use_namespaces => 1,
+      exclude        => qr/^current_/,
+    }, [
+      "dbi:SQLite:dbname=$database", '', '', {
+        sqlite_open_flags => SQLITE_OPEN_READONLY,
+        sqlite_unicode    => 1,
+      }
+    ]
+  );
+} catch ($error) {
+  die "Schema regeneration failed: $error";
+}
+
+say 'Regenerated ClaphamShopfronts::Schema from db/claphamshopfronts.ddl.';

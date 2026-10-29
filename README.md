@@ -83,6 +83,20 @@ perl bin/migrate-db.pl
 
 This assigns each unit a stored, unique address slug in a transaction, preserving IDs, related records, timestamps, views, indexes, and triggers. A version-0 upgrade also adds the optional `observations.business_id` link and its index. Existing photo observations are identified only when their reviewed import metadata matches the recorded unit, date, and original checksum; sign text alone is not used to guess an identity. Migration repeats report `already_current`. Earlier schemas are retained as migration test fixtures in `t/fixtures/schema-v0.sql` and `t/fixtures/schema-v1.sql`.
 
+## Regenerate DBIC classes
+
+After changing [`db/claphamshopfronts.ddl`](db/claphamshopfronts.ddl), regenerate the schema and result classes with:
+
+```sh
+bin/regenerate-schema
+```
+
+The command uses DBIx::Class::Schema::Loader, already listed among the development dependencies. It loads the DDL into a temporary SQLite database, introspects that database in read-only mode, and writes `lib/ClaphamShopfronts/Schema.pm` and the eleven table classes under `lib/ClaphamShopfronts/Schema/Result/`. It keeps the existing `current` naming convention and excludes the `current_*` views.
+
+Custom code below Loader's `DO NOT MODIFY THIS OR ANYTHING ABOVE` marker is preserved, including `connect_database`. Put future custom methods below that marker too. Review the generated diff after changing the DDL. Repeating regeneration with unchanged DDL leaves the files unchanged.
+
+Regeneration does not read or modify the populated `db/claphamshopfront.db`, and it does not apply migrations. Keep the migration code in step with the DDL and run migrations separately when upgrading an existing database. The command resolves paths from its own location, so it also works when called from another directory.
+
 ## Unit URLs
 
 A unit's public URL uses its postcode and street number: `/shopfronts/sw4-7ts-7/` for 7 Clapham High Street, SW4 7TS. Letter suffixes and number ranges are retained: `sw4-7ts-7a` and `sw4-7ts-7-9`.

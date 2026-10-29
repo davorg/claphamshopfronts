@@ -296,6 +296,8 @@ The 20 explicit indexes support address and business-name lookups, common foreig
 
 ## Schema migration
 
+The DBIx::Class mappings can be regenerated from the DDL using [`bin/regenerate-schema`](bin/regenerate-schema). It builds a temporary SQLite database and uses DBIx::Class::Schema::Loader to regenerate the eleven table classes, excluding the `current_*` views. Custom code below Loader's generated-code markers is preserved. The populated database is untouched; see [Regenerate DBIC classes](README.md#regenerate-dbic-classes).
+
 The DDL creates schema version 2, recorded in SQLite's persistent `PRAGMA user_version`. The [migration command](bin/migrate-db.pl) upgrades version-0 and version-1 databases transactionally. It assigns each unit an address slug, using explicit `unit.slug` values from reviewed import manifests where supplied. Ambiguous or unusable addresses stop the migration for an explicit choice. The units table is rebuilt to enforce the same `NOT NULL` and `UNIQUE` constraints as a fresh database, preserving existing IDs, fields, timestamps, dependent rows, indexes, triggers, and views. Foreign keys are checked before committing.
 
 A version-0 upgrade also adds `observations.business_id` and its index, then links existing photo observations to businesses only when reviewed import manifests match the unit, photograph date, observation date, and original checksum. A repeat migration does not alter the data. Earlier DDL is retained in `t/fixtures/schema-v0.sql` and `t/fixtures/schema-v1.sql` for migration tests. Application connections require version 2; fresh databases created from the current DDL already satisfy that requirement.
