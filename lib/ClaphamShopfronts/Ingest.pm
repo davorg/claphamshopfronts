@@ -3,6 +3,7 @@ package ClaphamShopfronts::Ingest;
 use v5.36;
 use feature 'try';
 no warnings 'experimental::try';
+use Moose;
 use Path::Tiny qw(path);
 use File::Temp qw(tempdir);
 use Image::ExifTool qw(ImageInfo);
@@ -10,11 +11,19 @@ use Image::Magick;
 use ClaphamShopfronts::Schema;
 use ClaphamShopfronts::Util qw(read_json file_sha display_date image_size unit_slug validate_slug);
 
-sub new ($class, %options) {
-  return bless {
-    root => path($options{root})->absolute,
-  }, $class;
-}
+has root => (
+  is       => 'ro',
+  isa      => 'Path::Tiny',
+  required => 1,
+);
+
+around BUILDARGS => sub ($original, $class, @arguments) {
+  my $arguments = $class->$original(@arguments);
+
+  $arguments->{root} = path($arguments->{root})->absolute if exists $arguments->{root};
+
+  return $arguments;
+};
 
 sub finish_original ($self, $source, $destination) {
   return if "$source" eq "$destination";
@@ -135,7 +144,7 @@ sub observation_plan ($self, $schema, $data, $taken_on) {
 }
 
 sub ingest ($self, $manifest_path, %options) {
-  my $root = $self->{root};
+  my $root = $self->root;
   my $data = read_json($manifest_path);
   my $name = $data->{original};
 
@@ -384,5 +393,8 @@ sub ingest ($self, $manifest_path, %options) {
   $self->finish_original($source, $processed) unless $options{dry_run};
   return $result;
 }
+
+no Moose;
+__PACKAGE__->meta->make_immutable;
 
 1;

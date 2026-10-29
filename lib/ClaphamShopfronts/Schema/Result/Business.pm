@@ -13,7 +13,10 @@ ClaphamShopfronts::Schema::Result::Business
 use strict;
 use warnings;
 
-use base 'DBIx::Class::Core';
+use Moose;
+use MooseX::NonMoose;
+use MooseX::MarkAsMethods autoclean => 1;
+extends 'DBIx::Class::Core';
 
 =head1 TABLE: C<businesses>
 
@@ -208,9 +211,10 @@ Composing rels: L</business_tags> -> tag
 __PACKAGE__->many_to_many("tags", "business_tags", "tag");
 
 
-# Created by DBIx::Class::Schema::Loader v0.07053 @ 2026-10-29 13:30:38
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:nJ5pTOYk74S8TFeOf78VHw
+# Created by DBIx::Class::Schema::Loader v0.07053 @ 2026-10-29 16:55:12
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:eAfot60F8/rNETTmM3oDcg
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration
+__PACKAGE__->meta->make_immutable;
 1;

@@ -1,5 +1,8 @@
 requires 'perl', '5.036';
 requires 'DBIx::Class';
+requires 'Moose';
+requires 'MooseX::NonMoose';
+requires 'MooseX::MarkAsMethods';
 requires 'DBD::SQLite';
 requires 'Template';
 requires 'JSON::MaybeXS';

@@ -13,7 +13,10 @@ ClaphamShopfronts::Schema::Result::Occupancy
 use strict;
 use warnings;
 
-use base 'DBIx::Class::Core';
+use Moose;
+use MooseX::NonMoose;
+use MooseX::MarkAsMethods autoclean => 1;
+extends 'DBIx::Class::Core';
 
 =head1 TABLE: C<occupancies>
 
@@ -161,9 +164,10 @@ __PACKAGE__->belongs_to(
 );
 
 
-# Created by DBIx::Class::Schema::Loader v0.07053 @ 2026-10-29 12:35:57
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:ymLpyxoNkhYg2EU35bcDDA
+# Created by DBIx::Class::Schema::Loader v0.07053 @ 2026-10-29 16:55:12
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:LLPYj9P1Vka9VhOaMxrCKQ
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration
+__PACKAGE__->meta->make_immutable;
 1;

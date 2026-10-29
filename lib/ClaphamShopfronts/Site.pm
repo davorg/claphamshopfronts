@@ -2,6 +2,7 @@ package ClaphamShopfronts::Site;
 
 use v5.36;
 use utf8;
+use Moose;
 use Path::Tiny qw(path);
 use Template;
 use URI;
@@ -19,23 +20,40 @@ my %STATUS = (
   unknown             => 'State unknown'
 );
 
-sub new ($class, %options) {
-  my $root = path($options{root})->absolute;
+has root => (
+  is       => 'ro',
+  isa      => 'Path::Tiny',
+  required => 1,
+);
 
-  return bless {
-    root => $root,
-    tt   => Template->new({
-      INCLUDE_PATH => "" . $root->child('templates'),
-      ENCODING     => 'utf8',
-      STRICT       => 1,
-    })
-  }, $class;
+has tt => (
+  is       => 'ro',
+  isa      => 'Template',
+  init_arg => undef,
+  lazy     => 1,
+  builder  => '_build_tt',
+);
+
+around BUILDARGS => sub ($original, $class, @arguments) {
+  my $arguments = $class->$original(@arguments);
+
+  $arguments->{root} = path($arguments->{root})->absolute if exists $arguments->{root};
+
+  return $arguments;
+};
+
+sub _build_tt ($self) {
+  return Template->new({
+    INCLUDE_PATH => "" . $self->root->child('templates'),
+    ENCODING     => 'utf8',
+    STRICT       => 1,
+  });
 }
 
 sub render ($self, $template, $variables) {
   my $output = '';
 
-  $self->{tt}->process($template, $variables, \$output) or die $self->{tt}->error . "\n";
+  $self->tt->process($template, $variables, \$output) or die $self->tt->error . "\n";
 
   return $output;
 }
@@ -94,7 +112,7 @@ sub photo_assets ($self, $photo, $base) {
     if $filename =~ m{^/|(?:^|/)\.\.(?:/|$)|\\} || $filename !~ /\.webp$/;
 
   (my $thumbnail = $filename) =~ s/\.webp$/-small.webp/;
-  my $images = $self->{root}->child('docs/images')->realpath;
+  my $images = $self->root->child('docs/images')->realpath;
   my @sizes;
 
   for my $relative ($filename, $thumbnail) {
@@ -198,7 +216,7 @@ sub history ($publication, $photos) {
 }
 
 sub build ($self, %options) {
-  my $root = $self->{root};
+  my $root = $self->root;
   my $config = read_json($root->child('data/site.json'));
   my $site_url = web_url($config->{site_url});
 
@@ -446,5 +464,8 @@ sub build ($self, %options) {
     changed_files       => [map { "" . path($_)->relative($root) } @changed]
   };
 }
+
+no Moose;
+__PACKAGE__->meta->make_immutable;
 
 1;

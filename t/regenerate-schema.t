@@ -70,9 +70,16 @@ subtest 'regeneration follows the DDL and preserves custom code and populated da
     $^X, '-I' . $root->child('lib'), '-MClaphamShopfronts::Schema', '-e',
     q{die "wrong source count" unless scalar(ClaphamShopfronts::Schema->sources) == 11;
       die "missing column" unless ClaphamShopfronts::Schema->source('Unit')->has_column('regeneration_probe');
-      die "lost custom code" unless ClaphamShopfronts::Schema->regeneration_probe eq 'custom code preserved';}
+      die "lost custom code" unless ClaphamShopfronts::Schema->regeneration_probe eq 'custom code preserved';
+      die "schema is not Moose" unless ClaphamShopfronts::Schema->meta->isa('Moose::Meta::Class');
+      die "schema is mutable" unless ClaphamShopfronts::Schema->meta->is_immutable;
+      for my $source (ClaphamShopfronts::Schema->sources) {
+        my $class = ClaphamShopfronts::Schema->source($source)->result_class;
+        die "$class is not Moose" unless $class->meta->isa('Moose::Meta::Class');
+        die "$class is mutable" unless $class->meta->is_immutable;
+      }}
   );
-  is $exit, 0, 'regenerated classes load with all eleven tables and no current_* views' or diag $stderr;
+  is $exit, 0, 'regenerated Moose classes load immutably with eleven tables and no current_* views' or diag $stderr;
 
   my $generated = generated_files($root);
   ($exit, $stdout, $stderr) = run_command($^X, $script);

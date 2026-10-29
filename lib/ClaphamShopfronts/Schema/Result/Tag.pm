@@ -13,7 +13,10 @@ ClaphamShopfronts::Schema::Result::Tag
 use strict;
 use warnings;
 
-use base 'DBIx::Class::Core';
+use Moose;
+use MooseX::NonMoose;
+use MooseX::MarkAsMethods autoclean => 1;
+extends 'DBIx::Class::Core';
 
 =head1 TABLE: C<tags>
 
@@ -122,9 +125,10 @@ Composing rels: L</unit_tags> -> unit
 __PACKAGE__->many_to_many("units", "unit_tags", "unit");
 
 
-# Created by DBIx::Class::Schema::Loader v0.07053 @ 2026-10-29 12:35:57
-# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:VPJ3Z4RDbiKeDsjZ5l+HPg
+# Created by DBIx::Class::Schema::Loader v0.07053 @ 2026-10-29 16:55:12
+# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:Ppsz78ZI1hzEdw2SRm8y+w
 
 
 # You can replace this text with custom code or comments, and it will be preserved on regeneration
+__PACKAGE__->meta->make_immutable;
 1;

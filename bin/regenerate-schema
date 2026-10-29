@@ -50,6 +50,7 @@ try {
       dump_directory => "" . $root->child('lib'),
       naming         => 'current',
       use_namespaces => 1,
+      use_moose      => 1,
       exclude        => qr/^current_/,
     }, [
       "dbi:SQLite:dbname=$database", '', '', {

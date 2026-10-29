@@ -43,7 +43,7 @@ See [the database documentation](database.md) for the photo metadata and its rel
 
 ## Import a photograph
 
-The commands use Perl 5.36 or later, DBIx::Class, Template Toolkit, Image::ExifTool, and the Perl ImageMagick bindings. ImageMagick needs WebP support. Dependencies are listed in `cpanfile`; install them with your usual Perl environment:
+The commands use Perl 5.36 or later, Moose, DBIx::Class, Template Toolkit, Image::ExifTool, and the Perl ImageMagick bindings. ImageMagick needs WebP support. Dependencies are listed in `cpanfile`; install them with your usual Perl environment:
 
 ```sh
 cpanm --installdeps .
@@ -59,6 +59,8 @@ perl bin/ingest-photo.pl data/photos/PXL_20260403_065904338.json
 ```
 
 Rerunning an imported manifest reports `already_ingested` and does not create duplicate records. It is not a command for applying later corrections to a record. Application code lives in `lib/ClaphamShopfronts/`; DBIx::Class result classes map all eleven tables under `lib/ClaphamShopfronts/Schema/Result/`. SQLite continues to enforce the constraints and triggers in the DDL.
+
+The importer and page generator use Moose constructors and typed, read-only attributes. Each requires a `root` argument, accepting either a path string or a `Path::Tiny` object and normalising it to an absolute path. Both named arguments and a hash reference are supported.
 
 If one photograph shows two units, ingest it for the first unit, then use a second manifest with the same original and checksum plus `share_image_from` naming that first unit's code. The importer reuses the archived original and both WebP copies, creating a separate photo/observation association for the second unit with its own caption and business identity. Each manifest can be rerun safely. Shared images appear once among recent homepage photographs. The Jeannette Fashions and Elvira Graham manifests show this workflow:
 
@@ -91,9 +93,9 @@ After changing [`db/claphamshopfronts.ddl`](db/claphamshopfronts.ddl), regenerat
 bin/regenerate-schema
 ```
 
-The command uses DBIx::Class::Schema::Loader, already listed among the development dependencies. It loads the DDL into a temporary SQLite database, introspects that database in read-only mode, and writes `lib/ClaphamShopfronts/Schema.pm` and the eleven table classes under `lib/ClaphamShopfronts/Schema/Result/`. It keeps the existing `current` naming convention and excludes the `current_*` views.
+The command uses DBIx::Class::Schema::Loader, already listed among the development dependencies. It loads the DDL into a temporary SQLite database, introspects that database in read-only mode, and writes `lib/ClaphamShopfronts/Schema.pm` and the eleven table classes under `lib/ClaphamShopfronts/Schema/Result/`. It enables `use_moose`, keeps the existing `current` naming convention and excludes the `current_*` views. Generated classes use Moose, with MooseX::NonMoose for result-class construction and MooseX::MarkAsMethods for namespace cleanup; these are runtime dependencies in `cpanfile`.
 
-Custom code below Loader's `DO NOT MODIFY THIS OR ANYTHING ABOVE` marker is preserved, including `connect_database`. Put future custom methods below that marker too. Review the generated diff after changing the DDL. Repeating regeneration with unchanged DDL leaves the files unchanged.
+Custom code below Loader's `DO NOT MODIFY THIS OR ANYTHING ABOVE` marker is preserved, including `connect_database`. Put future custom methods below that marker and before `make_immutable`. Review the generated diff after changing the DDL. Repeating regeneration with unchanged DDL leaves the files unchanged.
 
 Regeneration does not read or modify the populated `db/claphamshopfront.db`, and it does not apply migrations. Keep the migration code in step with the DDL and run migrations separately when upgrading an existing database. The command resolves paths from its own location, so it also works when called from another directory.
 
