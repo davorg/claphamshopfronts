@@ -18,7 +18,9 @@ subtest 'DBIC data, TT escaping, history and repeatable output' => sub {
   for my $text ('7 Clapham High Street, London', 'Second-hand clothing shop', 'Vacant when photographed',
       'Reported · unconfirmed', '31 January 2025', 'The exact closing date is unknown.', 'The old shop &amp; its shutter.',
       'href="../../#the-project"', 'href="../../styles.css"', 'data-photo-modal="photo-modal"',
-      '<dialog class="photo-modal"', 'aria-label="Close photograph"', 'src="../../photo-modal.js"') {
+      '<dialog class="photo-modal"', 'aria-label="Close photograph"', 'src="../../photo-modal.js"',
+      'aria-label="Previous photograph"', 'aria-label="Next photograph"', 'aria-describedby="photo-modal-details"',
+      'aria-live="polite" aria-atomic="true"') {
     ok index($page, $text) >= 0, "page contains $text";
   }
   unlike $page, qr/Internal: not for publication/, 'internal database notes stay private';

@@ -94,7 +94,7 @@ The generator also updates the homepage's **Recent photographs** section, showin
 
 Page content is maintained in `templates/shopfront.tt`, the reusable `templates/photograph.tt`, and `templates/recent-photographs.tt`. Generated pages reuse the homepage's head, navigation, and footer, including its fonts, analytics, and project credit. After changing those shared homepage elements, rebuild to propagate them. Styling stays in `docs/styles.css`.
 
-On a shopfront page, clicking any photograph or its “View larger” link opens that photograph in a native dialog, with the matching caption and business name. Close it with ×, Escape, or the backdrop; keyboard focus returns to the link that opened it. Without JavaScript, these links still open the image directly. The enhancement is in `docs/photo-modal.js`.
+On a shopfront page, clicking any photograph or its “View larger” link opens that photograph in a native dialog carousel. Previous/next buttons and the left/right arrow keys browse all photographs of that unit, newest first, wrapping at either end. Each slide shows its business name, date, photographer credit where available, and position in the set. Navigation buttons are hidden for a single photograph. Close it with ×, Escape, or the backdrop; keyboard focus returns to the original link, even after browsing. Without JavaScript, these links still open the image directly. The enhancement is in `docs/photo-modal.js`.
 
 Check whether generated output needs rebuilding without writing files:
 

@@ -85,11 +85,19 @@
     </section>
   </main>
 
-  <dialog class="photo-modal" id="photo-modal" aria-label="Larger photograph of [% business_name | html %]">
+  <dialog class="photo-modal" id="photo-modal" aria-label="Larger photograph of [% business_name | html %]" aria-describedby="photo-modal-details">
     <form method="dialog">
       <button class="photo-modal-close" type="submit" aria-label="Close photograph" autofocus><span aria-hidden="true">×</span></button>
     </form>
     <img src="[% image_url | html %]" width="[% image_width | html %]" height="[% image_height | html %]" alt="[% caption | html %]">
+    <div class="photo-modal-toolbar">
+      <button class="photo-modal-nav photo-modal-previous" type="button" aria-label="Previous photograph"><span aria-hidden="true">←</span></button>
+      <div class="photo-modal-details" id="photo-modal-details" aria-live="polite" aria-atomic="true">
+        <p class="photo-modal-caption"></p>
+        <p class="photo-modal-count"></p>
+      </div>
+      <button class="photo-modal-nav photo-modal-next" type="button" aria-label="Next photograph"><span aria-hidden="true">→</span></button>
+    </div>
   </dialog>
 
 [% footer %]

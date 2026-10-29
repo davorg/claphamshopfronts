@@ -144,11 +144,19 @@
     </section>
   </main>
 
-  <dialog class="photo-modal" id="photo-modal" aria-label="Larger photograph of Tony Voyage">
+  <dialog class="photo-modal" id="photo-modal" aria-label="Larger photograph of Tony Voyage" aria-describedby="photo-modal-details">
     <form method="dialog">
       <button class="photo-modal-close" type="submit" aria-label="Close photograph" autofocus><span aria-hidden="true">×</span></button>
     </form>
     <img src="/images/photos/2026/10/PXL_20261029_130247804.webp" width="1205" height="1600" alt="Tony Voyage Hair Salon at 7 Clapham High Street, London SW4 7TS, photographed on 29 October 2026. The cream salon sign and glass frontage replace the blue Pure Vintage fascia and shuttered appearance documented in April.">
+    <div class="photo-modal-toolbar">
+      <button class="photo-modal-nav photo-modal-previous" type="button" aria-label="Previous photograph"><span aria-hidden="true">←</span></button>
+      <div class="photo-modal-details" id="photo-modal-details" aria-live="polite" aria-atomic="true">
+        <p class="photo-modal-caption"></p>
+        <p class="photo-modal-count"></p>
+      </div>
+      <button class="photo-modal-nav photo-modal-next" type="button" aria-label="Next photograph"><span aria-hidden="true">→</span></button>
+    </div>
   </dialog>
 
 <footer class="site-footer wrap">
