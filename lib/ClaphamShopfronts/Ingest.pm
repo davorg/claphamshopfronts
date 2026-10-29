@@ -1,6 +1,8 @@
 package ClaphamShopfronts::Ingest;
 
 use v5.36;
+use feature 'try';
+no warnings 'experimental::try';
 use Path::Tiny qw(path);
 use File::Temp qw(tempdir);
 use Image::ExifTool qw(ImageInfo);
@@ -221,7 +223,7 @@ sub ingest ($self, $manifest_path, %options) {
   };
 
   my $schema = ClaphamShopfronts::Schema->connect_database(
-    $root->child('db/claphamshopfront.db'), read_only => $options{dry_run});
+    $root->child('db/claphamshopfront.db'), read_only => $options{dry_run}
   );
 
   my @created;
@@ -366,14 +368,17 @@ sub ingest ($self, $manifest_path, %options) {
     };
   };
 
-  my $result = eval { $options{dry_run} ? $work->() : $schema->txn_do($work) };
+  my $result;
 
-  my $error = $@;
-  $schema->storage->disconnect;
-  if ($error) {
+  try {
+    $result = $options{dry_run} ? $work->() : $schema->txn_do($work);
+  } catch ($error) {
+    $schema->storage->disconnect;
     $_->remove for @created;
     die $error;
   }
+
+  $schema->storage->disconnect;
 
   # A rerun can finish this move after an interrupted, committed import.
   $self->finish_original($source, $processed) unless $options{dry_run};

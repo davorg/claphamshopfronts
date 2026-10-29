@@ -1,6 +1,8 @@
 #!/usr/bin/env perl
 
 use v5.36;
+use feature 'try';
+no warnings 'experimental::try';
 use FindBin;
 use lib "$FindBin::Bin/../lib";
 use Getopt::Long qw(GetOptions);
@@ -23,13 +25,15 @@ if ($help) {
 my $manifest = shift @ARGV;
 die "Unexpected arguments\n" if @ARGV;
 
-my $result = eval {
-  ClaphamShopfronts::Ingest->new(
-    root => "$FindBin::Bin/.."
-  )->ingest($manifest, dry_run => $dry_run)
-};
+my $result;
 
-die "Import failed: $@" if $@;
+try {
+  $result = ClaphamShopfronts::Ingest->new(
+    root => "$FindBin::Bin/.."
+  )->ingest($manifest, dry_run => $dry_run);
+} catch ($error) {
+  die "Import failed: $error";
+}
 
 print JSON::MaybeXS->new(
   utf8      => 1,
