@@ -11,6 +11,8 @@ Ingestion means that the photograph has a saved record in the database’s `phot
 
 The folders track the state of the originals; they are not the public image paths. `photos.filename` should refer to the published image copy relative to the image root, as described in [Photograph storage](../README.md#photograph-storage). Moving an original between these folders should not change that database value.
 
+The street-sign photograph used as the project's social avatar is stored separately at [`docs/images/clapham-high-street-sign.jpg`](../docs/images/clapham-high-street-sign.jpg), renamed from `PXL_20260325_090616630.jpg`. It is a branding asset and does not need a shopfront database record.
+
 The processed archive includes Pure Vintage and Tony Voyage at 7 Clapham High Street, Dentons Catering Equipment at 2-4, the former Bubba Oasis venue at 44-48, Elements Sushi at 80, Fruit & More at 86-90, The Rattlin' Bog at 4 Clapham Common South Side, and a shared photograph of Jeannette Fashions at 22 and Elvira Graham at 20 Clapham High Street. Reviewed metadata is retained in [`data/photos/`](../data/photos/). Originals still in `incoming/` await ingestion. Using a photograph as a reference for the watercolour artwork does not ingest it into the photographic archive.
 
 ## Pilot importer

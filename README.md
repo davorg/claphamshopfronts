@@ -14,11 +14,13 @@ Run this from the repository root using App::HTTPThis, then visit `http://localh
 
 The page uses Cormorant Garamond, DM Sans, and Caveat from Google Fonts, with local fallback fonts. Styles are in `docs/styles.css`.
 
-The hero is a responsive collage of eight watercolour interpretations of the original photographs in `pics/`. It uses four columns on larger screens and two on phones. The paper, tape, and small rotations are CSS. Motion respects the visitor’s reduced-motion setting.
+The hero is a responsive collage of eight watercolour interpretations of the project's original photographs. It uses four columns on larger screens and two on phones. The paper, tape, and small rotations are CSS. Motion respects the visitor’s reduced-motion setting.
 
 Finished paintings are in `docs/images/watercolours/`. Each has a full-size WebP and a smaller version for the page. A reusable, flattened collage is in `docs/images/hero-collage.webp`.
 
 See [the artwork notes](artwork/README.md) for individual image links, source photographs, and the exact imagegen prompts.
+
+The original Clapham High Street sign photograph used as the project's social avatar is [`docs/images/clapham-high-street-sign.jpg`](docs/images/clapham-high-street-sign.jpg). It is a branding asset, separate from the shopfront photo archive.
 
 ## Photograph storage
 
