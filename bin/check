@@ -1,0 +1,130 @@
+#!/usr/bin/env perl
+
+use v5.36;
+use feature 'try';
+no warnings 'experimental::try';
+use FindBin;
+use Getopt::Long qw(GetOptions);
+use File::Temp qw(tempdir);
+use Path::Tiny qw(path);
+
+my $help;
+
+GetOptions('help' => \$help) or die "Use --help for usage\n";
+
+if ($help) {
+  say 'Usage: bin/check';
+  say 'Run tests, check generated pages, and compare DBIC classes with the DDL.';
+  exit 0;
+}
+
+die "Unexpected arguments\n" if @ARGV;
+
+my $root = path($FindBin::Bin)->parent->absolute;
+chdir $root or die "Cannot change directory to $root: $!\n";
+$| = 1;
+
+sub run_command (@command) {
+  my $status = system {$command[0]} @command;
+
+  die "Cannot run $command[0]: $!\n" if $status == -1;
+  die "$command[0] terminated by signal " . ($status & 127) . "\n" if $status & 127;
+  die "$command[0] exited with status " . ($status >> 8) . "\n" if $status;
+}
+
+sub run_check ($name, $work) {
+  say "Checking $name...";
+
+  try {
+    $work->();
+    say "PASS: $name";
+    return 1;
+  } catch ($error) {
+    warn "FAIL: $name: $error";
+    return 0;
+  }
+}
+
+sub generated_files ($library) {
+  my @files = ('ClaphamShopfronts/Schema.pm');
+  my $results = $library->child('ClaphamShopfronts/Schema/Result');
+
+  if ($results->is_dir) {
+    my $iterator = $results->iterator({recurse => 1});
+
+    while (my $file = $iterator->()) {
+      push @files, "" . $file->relative($library) if $file->is_file && $file =~ /\.pm\z/;
+    }
+  }
+
+  return @files;
+}
+
+sub generated_code ($file) {
+  my $source = $file->slurp_utf8;
+  $source =~ s/\r\n/\n/g;
+
+  # Compare only Loader's generated region. Custom methods are maintained by
+  # hand, and generator version/timestamp/checksum comments are not schema data.
+  $source =~ s{\n\# Created by DBIx::Class::Schema::Loader v[^\n]+\n\# DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:[^\n]+\n.*\z}{}s
+    or die "No Schema::Loader marker in $file\n";
+
+  return $source;
+}
+
+sub check_schema ($root) {
+  my $temporary = path(tempdir('clapham-check-XXXXXX', TMPDIR => 1, CLEANUP => 1));
+
+  for my $relative ('bin/regenerate-schema', 'db/claphamshopfronts.ddl') {
+    my $destination = $temporary->child($relative);
+    $destination->parent->mkpath;
+    $root->child($relative)->copy($destination);
+  }
+
+  # A fresh dump also reveals obsolete classes: Loader normally preserves old
+  # files in an existing result directory when a table has been removed.
+  my $fresh_library = $temporary->child('lib');
+  $fresh_library->mkpath;
+  run_command($^X, "" . $temporary->child('bin/regenerate-schema'));
+
+  my $library = $root->child('lib');
+  my %files = map {$_ => 1} (generated_files($library), generated_files($fresh_library));
+  my @differences;
+
+  for my $relative (sort keys %files) {
+    my $existing = $library->child($relative);
+    my $fresh = $fresh_library->child($relative);
+
+    if (!$existing->is_file) {
+      push @differences, "Missing class: lib/$relative";
+    } elsif (!$fresh->is_file) {
+      push @differences, "Obsolete class: lib/$relative";
+    } elsif (generated_code($existing) ne generated_code($fresh)) {
+      push @differences, "Stale class: lib/$relative";
+    }
+  }
+
+  die join("\n", @differences) . "\nRun bin/regenerate-schema after updating the DDL; review obsolete classes separately.\n"
+    if @differences;
+}
+
+my $failures = 0;
+
+$failures++ unless run_check('Perl tests', sub {
+  run_command($^X, '-S', 'prove', '-Ilib', '-It/lib', '-l', 't');
+});
+
+$failures++ unless run_check('generated pages', sub {
+  run_command($^X, 'bin/build-site.pl', '--check');
+});
+
+$failures++ unless run_check('DBIC classes', sub {
+  check_schema($root);
+});
+
+if ($failures) {
+  warn "$failures check(s) failed.\n";
+  exit 1;
+}
+
+say 'All checks passed.';

@@ -2,8 +2,8 @@ package ClaphamShopfronts::Ingest;
 
 use v5.36;
 use feature 'try';
-no warnings 'experimental::try';
 use Moose;
+no warnings 'experimental::try';
 use Path::Tiny qw(path);
 use File::Temp qw(tempdir);
 use Image::ExifTool qw(ImageInfo);

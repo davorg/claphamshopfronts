@@ -1,0 +1,66 @@
+name: Checks
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: checks-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: Perl ${{ matrix.perl }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        perl: ['5.36', '5.44']
+    container: perl:${{ matrix.perl }}
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      # Build the bindings with this container's Perl, so their ABI matches.
+      - name: Install ImageMagick with JPEG, PNG and WebP support
+        env:
+          IMAGEMAGICK_VERSION: 7.1.2-34
+          IMAGEMAGICK_SHA256: f5163a573a1c1bff16358d0a592b2fb168ad0fd3b9dc5ff57dc7820eebc5cf79
+        run: |
+          apt-get update
+          apt-get install --yes --no-install-recommends \
+            build-essential ca-certificates curl pkg-config \
+            libjpeg-dev libpng-dev libwebp-dev libxml2-dev zlib1g-dev
+          build_directory=$(mktemp -d)
+          curl --fail --location --retry 3 \
+            "https://codeload.github.com/ImageMagick/ImageMagick/tar.gz/refs/tags/${IMAGEMAGICK_VERSION}" \
+            --output "$build_directory/imagemagick.tar.gz"
+          echo "$IMAGEMAGICK_SHA256  $build_directory/imagemagick.tar.gz" | sha256sum --check
+          tar -xzf "$build_directory/imagemagick.tar.gz" --strip-components=1 --directory "$build_directory"
+          cd "$build_directory"
+          ./configure --prefix=/usr/local --with-perl="$(command -v perl)" \
+            --enable-shared --disable-static --without-magick-plus-plus \
+            --without-x --disable-openmp --with-webp=yes
+          make -j2
+          make install
+          ldconfig
+
+      - name: Install Perl dependencies
+        run: |
+          cpanm --notest --mirror https://cpan.metacpan.org --mirror-only \
+            --installdeps --cpanfile cpanfile.ci .
+          cpanm --notest --mirror https://cpan.metacpan.org --mirror-only \
+            --with-develop --installdeps .
+
+      - name: Check the project
+        run: bin/check

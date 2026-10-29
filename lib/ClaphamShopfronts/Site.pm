@@ -47,6 +47,10 @@ sub _build_tt ($self) {
     INCLUDE_PATH => "" . $self->root->child('templates'),
     ENCODING     => 'utf8',
     STRICT       => 1,
+    # Keep escaping identical across Template Toolkit releases and metadata.
+    FILTERS      => {
+      html => \&html,
+    },
   });
 }
 

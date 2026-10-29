@@ -135,8 +135,34 @@ To move the archive photographs to the intended AWS host later, change `image_ba
 
 ## Checks
 
-Run the import and page-generation checks with:
+Install the runtime, test and development dependencies using Perl 5.36 or later:
 
 ```sh
-prove -Ilib -It/lib -lv t
+cpanm --with-develop --installdeps .
 ```
+
+ImageMagick must include JPEG and WebP support, with its `Image::Magick` Perl bindings built for the Perl you are using. A distribution's prebuilt Perl bindings generally require its system Perl; if you use a separate Perl installation, build the bindings for that installation too.
+
+Run all checks with:
+
+```sh
+bin/check
+```
+
+This runs the Perl test suite, checks generated pages with `bin/build-site.pl --check`, and compares the DBIC classes with a fresh generation from the DDL in a temporary directory. It reports each failing stage, attempts the remaining checks, and exits nonzero if anything fails. The command works from any directory and leaves the populated database, original photographs, generated pages and source files unchanged.
+
+The schema comparison checks generated code, including missing and obsolete classes. It ignores Loader's version, timestamp and checksum comments and custom code below its marker. If the DDL changes, run `bin/regenerate-schema`, review the diff and any obsolete classes, then rerun `bin/check`. Rebuild stale pages with `perl bin/build-site.pl`.
+
+Templates use the same HTML escaping helper as page metadata, including apostrophe escaping, so generated output remains consistent across Template Toolkit versions.
+
+For verbose test output alone, use `prove -Ilib -It/lib -lv t`.
+
+[GitHub Actions](.github/workflows/check.yml) runs the same `bin/check` command on pushes and pull requests, using Perl 5.36 and 5.44. Each job builds a pinned ImageMagick release and its Perl bindings, then installs the Perl dependencies. [`cpanfile.ci`](cpanfile.ci) pins Schema::Loader and DBD::SQLite across the matrix to keep schema generation consistent; install those constraints before the main dependencies to reproduce the CI toolchain locally:
+
+```sh
+cpanm --installdeps --cpanfile cpanfile.ci .
+cpanm --with-develop --installdeps .
+bin/check
+```
+
+Formatting checks are not included; those can follow once a shared formatter configuration is agreed.

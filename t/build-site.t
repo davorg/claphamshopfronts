@@ -356,7 +356,7 @@ subtest 'complete archive is chronological, escaped and linked from every page' 
       taken_on       => $dates[$i],
       source_type    => 'own_photo',
       filename       => "photos/2026/04/extra-$i.webp",
-      caption        => '<script>Private markup & quoted "caption"</script>'
+      caption        => q{<script>Private markup & quoted "caption" and 'apostrophe'</script>}
     });
   }
 
@@ -389,8 +389,8 @@ subtest 'complete archive is chronological, escaped and linked from every page' 
   is_deeply [($archive =~ /<time datetime="([^"]+)"/g)], [qw(2026-05-15 2026-04-03 2026-03-02 2026-02-20 2026-01-10)],
     'sorted by capture date rather than insertion order';
   like $archive, qr{href="../shopfronts/sw4-7ts-7/#photo-1"}, 'old photograph retains its own unit anchor';
-  like $archive, qr{&lt;script&gt;Private markup &amp; quoted &quot;caption&quot;&lt;/script&gt;},
-    'photo captions escaped in image attributes';
+  like $archive, qr{&lt;script&gt;Private markup &amp; quoted &quot;caption&quot; and &#39;apostrophe&#39;&lt;/script&gt;},
+    'photo captions escape both kinds of quotes consistently across TT releases';
   unlike $archive, qr{<script>Private markup|Unpublished photograph|not-published.webp},
     'markup and unpublished photographs excluded';
   like $archive, qr{href="../styles.css"}, 'archive stylesheet resolves from its depth';

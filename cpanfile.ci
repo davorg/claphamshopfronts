@@ -1,0 +1,4 @@
+# Keep the schema introspection toolchain consistent across the CI Perl matrix.
+# Install these constraints before the main cpanfile's dependencies.
+requires 'DBIx::Class::Schema::Loader', '== 0.07053';
+requires 'DBD::SQLite', '== 1.78';
