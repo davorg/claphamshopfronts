@@ -1,0 +1,39 @@
+{
+  "original": "PXL_20260403_065840506.jpg",
+  "original_sha256": "8d1ffa53617478dee10f6788cff3a49f1651a637fea73f5d720340241fedc059",
+  "taken_on": "2026-04-03",
+  "site": {
+    "site_code": "CHS0002",
+    "street_address": "2-4 Clapham High Street, London",
+    "postcode": "SW4 7UT",
+    "notes": "Address supplied by the project owner. Camera GPS is not a verified coordinate of the premises; site coordinates remain unset."
+  },
+  "unit": {
+    "unit_code": "CHS0002-U01",
+    "label": "Dentons shop at 2-4 Clapham High Street",
+    "frontage_notes": "A single catering equipment shop spans the 2-4 address range, with a pale fascia, central roller shutter and two display windows showing catering equipment and relocation-sale posters. valid_from records the first observed configuration in this archive, not the creation date of the unit."
+  },
+  "business": {
+    "name": "Dentons Catering Equipment",
+    "normalised_name": "dentons catering equipment",
+    "type": "Catering equipment shop",
+    "is_chain": 0,
+    "website": "https://www.dentons.co.uk/",
+    "notes": "The project owner confirms this business was still trading at 2-4 Clapham High Street when photographed on 2026-04-03. The fascia reads dentons catering equipment. Its website describes a family-run business: https://www.dentonscatering.com/about-us (checked 2026-10-29). No chain or multiple simultaneous retail branches are established. The website address on the fascia redirects to https://www.dentonscatering.com/. The owner reports closure of the Clapham shop on Friday 2026-05-01, corroborated by the company's own LinkedIn announcement: https://www.linkedin.com/posts/denton%27s-catering-equipment-limited_dentons-onthemove-endofanera-activity-7456976259806445568-FUzm . That post states the business continued from South Wimbledon without a public-facing shop; this was not closure of the entire business. Original source supplied by the owner: https://www.linkedin.com/posts/dentons-onthemove-endofanera-share-7456976256807661568-cNxB/ . The announcement says 90 years on Clapham High Street; no exact opening date is inferred."
+  },
+  "observation": {
+    "status": "occupied",
+    "name_as_displayed": "dentons catering equipment",
+    "confidence": "high",
+    "observer": null,
+    "notes": "The project owner confirms Dentons was still trading at the time of this photograph. The closed central shutter at 07:58 local time is not evidence of vacancy. Catering equipment remains in both windows with relocation sale signs. A subsequent company announcement confirms the Clapham shop closed on 2026-05-01 and the business relocated to South Wimbledon."
+  },
+  "occupancy_valid_to": "2026-05-01",
+  "occupancy_notes": "Dentons occupied this shop when photographed on 2026-04-03, as confirmed by the project owner. This is an observation date, not the opening date. The company's LinkedIn announcement confirms its final trading day here was 2026-05-01, before continuing from South Wimbledon; valid_to records that supported final trading day, inclusively. The published event is also recorded in the website timeline and business notes; no vacant observation or post-closure occupant is invented.",
+  "photo": {
+    "source_url": null,
+    "attribution": null,
+    "caption": "Dentons Catering Equipment at 2-4 Clapham High Street, London SW4 7UT, photographed on 3 April 2026 while still trading. Relocation-sale posters fill the display windows beneath its pale shop sign.",
+    "notes": "EXIF DateTimeOriginal is 2026:04:03 07:58:40 with OffsetTimeOriginal +01:00. Address and trading status supplied by the project owner. The closure announcement is evidence about the business, not the source of this photograph. Photographer credit and a post URL for this photograph remain unset."
+  }
+}

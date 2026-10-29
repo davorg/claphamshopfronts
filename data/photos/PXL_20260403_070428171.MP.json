@@ -1,0 +1,38 @@
+{
+  "original": "PXL_20260403_070428171.MP.jpg",
+  "original_sha256": "fa18d60afb32e56041528777e50328821fa49adb65a4cda722a9db934065fd50",
+  "taken_on": "2026-04-03",
+  "site": {
+    "site_code": "CHS0005",
+    "street_address": "86-90 Clapham High Street, London",
+    "postcode": "SW4 7UL",
+    "notes": "Full address supplied by the project owner. The 86-90 range is visible on the fascia. Camera GPS is not a verified coordinate of the premises; site coordinates remain unset."
+  },
+  "unit": {
+    "unit_code": "CHS0005-U01",
+    "label": "Former Fruit & More shop at 86-90 Clapham High Street",
+    "frontage_notes": "A single frontage spans the 86-90 address range, with a dark Fruit & More fascia describing a delicatessen, patisserie, café and organic food. A graffiti-covered shutter is down beside glazed doors; scaffolding covers the building above. The owner confirms an established closure rather than temporary shuttering for these works. No split or merger is established. valid_from records the first observed configuration in this archive, not the creation date of the unit."
+  },
+  "business": {
+    "name": "Fruit & More",
+    "normalised_name": "fruit & more",
+    "type": "Delicatessen and café",
+    "is_chain": 0,
+    "website": "https://www.instagram.com/fruitandmoreclapham/",
+    "notes": "The project owner identifies this former shop at 86-90 Clapham High Street and confirms it had already been closed for a couple of years when photographed on 2026-04-03. This approximate recollection does not establish a closing day, month or year. The fascia describes a delicatessen, patisserie, café and fine/organic food. No multiple retail branches have been established; is_chain remains 0. The owner supplied the Instagram profile and reports its last post was dated 2022-12-21, without any closure announcement. The profile could not be independently retrieved on 2026-10-29. A last social-media post is not evidence of the final trading day; 2022-12-21 is not recorded as a closure date. The sign also displays www.fruitandmore.co.uk; its current availability has not been verified."
+  },
+  "observation": {
+    "status": "vacant",
+    "name_as_displayed": "FRUIT & MORE",
+    "confidence": "high",
+    "observer": null,
+    "notes": "The project owner confirms the former Fruit & More shop was closed, and had been for a couple of years, by the photograph date. The scaffolding does not establish that the business was merely closed temporarily for works. The retained fascia and shutter are photographed as evidence of the frontage, not ongoing trading. The exact closure date is unknown."
+  },
+  "occupancy_notes": "Vacancy documented on 2026-04-03, supported by the project owner's confirmation of an established closure. The owner recalls closure a couple of years before the photo; no precise closure boundary or historic occupied period is invented. The reported last Instagram post on 2022-12-21 said nothing about closure and is not used to date it. business_id is null for the vacant period; the observation identifies Fruit & More independently.",
+  "photo": {
+    "source_url": null,
+    "attribution": null,
+    "caption": "The former Fruit & More delicatessen and café at 86-90 Clapham High Street, London SW4 7UL, photographed on 3 April 2026 after closure. Its dark shop sign remains above a graffiti-covered shutter, with scaffolding covering the building above.",
+    "notes": "EXIF DateTimeOriginal is 2026:04:03 08:04:28 with OffsetTimeOriginal +01:00. Address, established closure and approximate length of vacancy were supplied by the project owner. The Instagram profile concerns the former business, not the source of this photograph. Photographer credit and a post URL for this photograph remain unset."
+  }
+}

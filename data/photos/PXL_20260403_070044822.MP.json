@@ -1,0 +1,38 @@
+{
+  "original": "PXL_20260403_070044822.MP.jpg",
+  "original_sha256": "7856672799097efc584d308645d96e6fd6762dc1b9a4e8f55470050eb4f9c37d",
+  "taken_on": "2026-04-03",
+  "site": {
+    "site_code": "CHS0007",
+    "street_address": "22 Clapham High Street, London",
+    "postcode": "SW4 7UR",
+    "notes": "Address supplied by the project owner; 22 is visible on the left shop's door. The owner states both 20 and 22 belonged to Maurice Dorfman until his death in 2020. Shared ownership does not merge the two shop units. The owner reports major building works now underway at the properties on 2026-10-29; no dated start, completed configuration, split or merger is established. Camera GPS is not a verified site coordinate."
+  },
+  "unit": {
+    "unit_code": "CHS0007-U01",
+    "label": "Former Jeannette Fashions shop at 22 Clapham High Street",
+    "frontage_notes": "The left-hand shop in this shared photograph, with a faded red Jeannette Fashions fascia, glazed display windows and a shuttered entrance marked 22. The neighbouring Elvira Graham shop at 20 is a separate unit. Later building works are recorded as an owner report, without assuming a new physical configuration. valid_from is the first observed configuration date in this archive."
+  },
+  "business": {
+    "name": "Jeannette Fashions",
+    "normalised_name": "jeannette fashions",
+    "type": "Haberdashery",
+    "is_chain": 0,
+    "website": null,
+    "notes": "The project owner identifies this shop at 22 Clapham High Street and says it closed immediately after proprietor Maurice Dorfman's death in 2020. Jim Grover's Behind the Shop Facade photo-essay https://www.behindtheshopfacade.com/the-story corroborates the family haberdashery's history and its end with Maurice's death in 2020 (checked 2026-10-29). The fascia and source spell the business Jeannette Fashions. No exact final trading day is established. No multiple retail branches have been established; is_chain remains 0. The owner reports Dorfman also owned the neighbouring Elvira Graham premises at 20; that shop continued after his death."
+  },
+  "observation": {
+    "status": "vacant",
+    "name_as_displayed": "Jeannette Fashions",
+    "confidence": "high",
+    "observer": null,
+    "notes": "The project owner confirms Jeannette Fashions closed in 2020 after Maurice Dorfman's death. The photo shows the retained red fascia and shuttered entrance of number 22 on the left. Its signs do not mean it was still trading. The other shop in the same photograph is recorded separately at number 20."
+  },
+  "occupancy_notes": "Vacancy documented on 2026-04-03. Closure in 2020 is supported by the owner's account and Jim Grover's photo-essay; no precise closing day or historic occupied period is invented. business_id is null for the vacant period; the observation identifies Jeannette Fashions independently. Later building works reported on 2026-10-29 do not retrospectively change this photo observation.",
+  "photo": {
+    "source_url": null,
+    "attribution": null,
+    "caption": "The former Jeannette Fashions haberdashery at 22 Clapham High Street, London SW4 7UR, on the left of this photograph taken on 3 April 2026. Its faded red fascia stands beside the former Elvira Graham shop at number 20, on the right.",
+    "notes": "EXIF DateTimeOriginal is 2026:04:03 08:00:44 with OffsetTimeOriginal +01:00. One original photograph documents two separate units. This record concerns Jeannette Fashions on the left; a second unit-specific record reuses the same image for Elvira Graham on the right. Photographer credit and a post URL for this photograph remain unset."
+  }
+}

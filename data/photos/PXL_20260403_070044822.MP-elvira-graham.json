@@ -1,0 +1,39 @@
+{
+  "original": "PXL_20260403_070044822.MP.jpg",
+  "original_sha256": "7856672799097efc584d308645d96e6fd6762dc1b9a4e8f55470050eb4f9c37d",
+  "share_image_from": "CHS0007-U01",
+  "taken_on": "2026-04-03",
+  "site": {
+    "site_code": "CHS0008",
+    "street_address": "20 Clapham High Street, London",
+    "postcode": "SW4 7UR",
+    "notes": "Address supplied by the project owner and corroborated by Elvira Graham's studio website: https://the-knitologist.wixsite.com/elviragraham/studio . The owner states both 20 and 22 belonged to Maurice Dorfman until his death in 2020; Elvira continued while inheritance arrangements were resolved, leaving in December 2025. Major building works are reported at the properties on 2026-10-29, not dated to the April photo. Shared ownership and subsequent works do not by themselves establish a split or merger. Camera GPS is not a verified site coordinate."
+  },
+  "unit": {
+    "unit_code": "CHS0008-U01",
+    "label": "Former Elvira Graham shop at 20 Clapham High Street",
+    "frontage_notes": "The right-hand shop in the shared photograph, with a blue ELVIRA GRAHAM fascia and a geometric yellow-and-blue panel above shuttered windows and a poster-covered entrance. The neighbouring Jeannette Fashions shop at 22 is a separate unit. valid_from is the first observed configuration date in this archive, not its construction or opening date."
+  },
+  "business": {
+    "name": "Elvira Graham",
+    "normalised_name": "elvira graham",
+    "type": "Knitwear shop",
+    "is_chain": 0,
+    "website": "https://the-knitologist.wixsite.com/elviragraham/studio",
+    "notes": "The project owner identifies this former shop at 20 Clapham High Street and reports Elvira left in December 2025, after continuing to trade while inheritance of Maurice Dorfman's properties was resolved following his death in 2020. No exact final trading day is established and no claim is made about whether the designer continued elsewhere. The designer's own studio page identifies Elvira Graham Knitwear at this address (checked 2026-10-29); it is a historical identity/address source, not evidence of ongoing trading here. No multiple retail branches have been established; is_chain remains 0. Jim Grover's photo-essay https://www.behindtheshopfacade.com/the-story documents Maurice and the neighbouring Jeannette Fashions business; Elvira's departure date and the shared property ownership are supplied by the project owner."
+  },
+  "observation": {
+    "status": "vacant",
+    "name_as_displayed": "ELVIRA GRAHAM",
+    "confidence": "high",
+    "observer": null,
+    "notes": "The project owner confirms Elvira left these premises in December 2025, before the photograph. The retained blue fascia is visible on the right of the shared image. This is a vacant shop observation, not a claim that the designer stopped working altogether. The neighbouring shop at 22 is documented separately."
+  },
+  "occupancy_notes": "Vacancy documented on 2026-04-03 following the owner's report that Elvira left in December 2025. The departure is known to month precision only; neither a final trading day nor a historic occupied period is invented. business_id is null for the vacancy; the observation identifies Elvira Graham independently. Major building works reported on 2026-10-29 are separate from the April photo and do not establish a successor business or new unit configuration.",
+  "photo": {
+    "source_url": null,
+    "attribution": null,
+    "caption": "The former Elvira Graham knitwear shop at 20 Clapham High Street, London SW4 7UR, on the right of this photograph taken on 3 April 2026. Its blue fascia and shuttered frontage stand beside the former Jeannette Fashions haberdashery at number 22, on the left.",
+    "notes": "EXIF DateTimeOriginal is 2026:04:03 08:00:44 with OffsetTimeOriginal +01:00. This unit-specific record reuses the original and both published copies already ingested for CHS0007-U01. The image has not been duplicated or cropped. Photographer credit and a post URL for this photograph remain unset."
+  }
+}

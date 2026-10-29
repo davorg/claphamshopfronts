@@ -7,7 +7,7 @@
 [% header %]
 
   <main id="main" class="shopfront-main wrap">
-    <a class="archive-back" href="../../#recent-photographs"><span aria-hidden="true">←</span> Back to the photographs</a>
+    <a class="archive-back" href="../../photos/"><span aria-hidden="true">←</span> Back to all photos</a>
     <header class="shopfront-heading">
       <p class="eyebrow">From the photographic archive</p>
       <h1>[% business_name | html %]</h1>
@@ -37,10 +37,10 @@
 [% FOREACH event IN history -%]
             <li>
               <time datetime="[% event.date | html %]">[% event.display_date | html %]</time>
-              <span class="archive-evidence-label">[% IF event.reported %]Reported · unconfirmed[% ELSE %]Documented[% END %]</span>
+              <span class="archive-evidence-label">[% IF event.reported %]Reported · unconfirmed[% ELSIF event.source_url %]Published source[% ELSE %]Documented[% END %]</span>
               <h3>[% event.title | html %]</h3>
               <p>[% event.description | html %]</p>
-[% IF event.reported -%]
+[% IF event.source_url -%]
               <a href="[% event.source_url | html %]">[% event.source_label | html %] <span aria-hidden="true">↗</span></a>
 [% END -%]
             </li>

@@ -23,4 +23,5 @@
         </li>
 [% END -%]
       </ul>
+      <a class="all-photos-link" href="photos/">Browse all photos <span aria-hidden="true">→</span></a>
     </section>

@@ -194,4 +194,73 @@ subtest 'ambiguous chronology and wrong site are rejected without changes' => su
   like $@, qr/different site or address/, 'existing unit cannot silently move to a different address';
 };
 
+subtest 'a sourced final trading day can end the imported occupancy without inventing vacancy' => sub {
+  my ($root, $schema) = fixture();
+  my ($manifest, $data) = setup_original($root);
+  $data->{observation}{status} = 'occupied';
+  $data->{occupancy_valid_to} = '2026-04-02';
+  save_json($manifest, $data);
+  my $importer = ClaphamShopfronts::Ingest->new(root => $root);
+  my $before = snapshot($root);
+  eval {$importer->ingest($manifest)};
+  like $@, qr/end date precedes/, 'end before photographed occupation rejected';
+  is_deeply snapshot($root), $before, 'rejection changes nothing';
+  $data->{occupancy_valid_to} = '2026-05-01';
+  save_json($manifest, $data);
+  $importer->ingest($manifest);
+  my $occupancy = $schema->resultset('Occupancy')->first;
+  is $occupancy->valid_from, '2026-04-03', 'photo supplies first supported date';
+  is $occupancy->valid_to, '2026-05-01', 'sourced final trading day retained';
+  is $occupancy->occupancy_status, 'occupied', 'historical trading state preserved';
+  is $schema->resultset('Observation')->count, 1, 'only the real observation recorded';
+  is $schema->storage->dbh->selectrow_array('SELECT count(*) FROM current_occupancies'), 0, 'closed shop does not appear as ongoing occupancy';
+  is $importer->ingest($manifest)->{result}, 'already_ingested', 'repeat remains safe';
+};
+
+subtest 'one original can explicitly document two units without duplicate image files' => sub {
+  my ($root, $schema) = fixture();
+  my ($first, $data) = setup_original($root);
+  my $importer = ClaphamShopfronts::Ingest->new(root => $root);
+  my $result = $importer->ingest($first);
+  $data->{site} = {site_code => 'CHS0002', street_address => '9 Clapham High Street, London', postcode => 'SW4 7TS'};
+  $data->{unit}{unit_code} = 'CHS0002-U01';
+  my $second = $root->child('data/photos/second-unit.json');
+  save_json($second, $data);
+  my $before = snapshot($root);
+  eval {$importer->ingest($second)};
+  like $@, qr/explicit share_image_from/, 'sharing cannot happen accidentally';
+  is_deeply snapshot($root), $before, 'rejection preserves all original records and files';
+  $data->{share_image_from} = 'MISSING-UNIT';
+  save_json($second, $data);
+  eval {$importer->ingest($second)};
+  like $@, qr/explicit share_image_from/, 'source unit must actually own matching image';
+  $data->{share_image_from} = 'CHS0001-U01';
+  save_json($second, $data);
+  $before = snapshot($root);
+  is $importer->ingest($second, dry_run => 1)->{result}, 'dry_run', 'shared import supports dry run';
+  is_deeply snapshot($root), $before, 'shared dry run changes nothing';
+  {
+    no warnings 'redefine';
+    no warnings 'once';
+    local *ClaphamShopfronts::Schema::Result::Photo::insert = sub {die "simulated shared record failure\n"};
+    eval {$importer->ingest($second)};
+    like $@, qr/simulated shared record failure/, 'database failure propagated';
+  }
+  is_deeply snapshot($root), $before, 'shared failure rolls back all records and preserves reused images';
+  {
+    no warnings 'redefine';
+    local *ClaphamShopfronts::Ingest::write_image = sub {die "must reuse existing copies\n"};
+    is $importer->ingest($second)->{result}, 'ingested', 'second unit reuses image copies';
+  }
+  is $schema->resultset('Photo')->count, 2, 'separate unit associations stored';
+  my @photos = $schema->resultset('Photo')->search({}, {order_by => 'id'})->all;
+  is $photos[0]->filename, $photos[1]->filename, 'one published image path shared';
+  isnt $photos[0]->unit_id, $photos[1]->unit_id, 'units remain separate';
+  is $_->unit_id, $_->observation->unit_id, 'each photo observation belongs to its own unit' for @photos;
+  is file_sha($root->child('pics/processed', $data->{original})), $data->{original_sha256}, 'one unchanged original archived';
+  $before = snapshot($root);
+  is $importer->ingest($_)->{result}, 'already_ingested', 'each association safely recognised on repeat' for ($first, $second);
+  is_deeply snapshot($root), $before, 'repeating shared imports changes nothing';
+};
+
 done_testing;

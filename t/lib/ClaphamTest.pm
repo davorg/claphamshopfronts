@@ -27,11 +27,15 @@ sub fixture (%options) {
     : defined $options{version} ? "t/fixtures/schema-v$options{version}.sql" : 'db/claphamshopfronts.ddl';
   $dbh->do($PROJECT->child($definition)->slurp_utf8);
   $dbh->disconnect;
-  for my $relative (qw(docs/index.html data/site.json templates/shopfront.tt templates/photograph.tt templates/recent-photographs.tt data/photos/PXL_20260403_065904338.json db/migrations/002-unit-slugs.sql)) {
+  for my $relative (qw(docs/index.html data/site.json templates/shopfront.tt templates/photograph.tt templates/recent-photographs.tt templates/all-photos.tt data/photos/PXL_20260403_065904338.json db/migrations/002-unit-slugs.sql)) {
     my $destination = $root->child($relative);
     $destination->parent->mkpath;
     $PROJECT->child($relative)->copy($destination);
   }
+  # Publish only the unit seeded by this fixture, independently of the live archive.
+  my $config = read_json($root->child('data/site.json'));
+  $config->{shopfronts} = [grep {$_->{unit_code} eq 'CHS0001-U01'} @{$config->{shopfronts}}];
+  save_json($root->child('data/site.json'), $config);
   return ($root, ClaphamShopfronts::Schema->connect_database($root->child('db/claphamshopfront.db'), allow_old_schema => $options{legacy} || defined $options{version}));
 }
 

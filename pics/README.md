@@ -11,13 +11,15 @@ Ingestion means that the photograph has a saved record in the database’s `phot
 
 The folders track the state of the originals; they are not the public image paths. `photos.filename` should refer to the published image copy relative to the image root, as described in [Photograph storage](../README.md#photograph-storage). Moving an original between these folders should not change that database value.
 
-Two photographs of 7 Clapham High Street are now in `processed/`: `PXL_20260403_065904338.jpg` (Pure Vintage, vacant in April) and `PXL_20261029_130247804.jpg` (Tony Voyage Hair Salon, occupied in October). The seven remaining original photographs are still in `incoming/`. Using a photograph as a reference for the watercolour artwork does not ingest it into the photographic archive.
+The processed archive includes Pure Vintage and Tony Voyage at 7 Clapham High Street, Dentons Catering Equipment at 2-4, the former Bubba Oasis venue at 44-48, Elements Sushi at 80, Fruit & More at 86-90, The Rattlin' Bog at 4 Clapham Common South Side, and a shared photograph of Jeannette Fashions at 22 and Elvira Graham at 20 Clapham High Street. Reviewed metadata is retained in [`data/photos/`](../data/photos/). Originals still in `incoming/` await ingestion. Using a photograph as a reference for the watercolour artwork does not ingest it into the photographic archive.
 
 ## Pilot importer
 
 The [Perl importer](../bin/ingest-photo.pl) takes reviewed metadata from `data/photos/`. It checks the original's SHA-256 hash and EXIF date with Image::ExifTool, enables SQLite foreign-key enforcement through DBIx::Class, creates or reuses the site and unit in a transaction, records the observation and photo, and generates two WebP copies with Image::Magick. Their longest edges are at most 1600 pixels and 640 pixels respectively; smaller images are not enlarged. The original is retained without resizing or changing its metadata.
 
 The large copy uses the original filename stem with a `.webp` extension; the smaller copy adds `-small.webp`. Both are stored under `docs/images/photos/YYYY/MM/`, using the EXIF photograph date. Only the large copy's image-root-relative path is stored in `photos.filename`.
+
+For one image showing multiple units, the first import generates its copies and archives the original. An additional unit manifest can explicitly reuse that image with `share_image_from` set to the first unit code. The checksum, date and source unit must match an existing photo record. This creates a separate unit-specific photo/observation record while preserving a single original and a single pair of published image files. See [Import a photograph](../README.md#import-a-photograph) for the ordered example commands.
 
 A new unit receives a stored address slug, such as `sw4-7ts-7`, for its public page. For shared or unusual addresses, choose an explicit manifest `unit.slug`; collisions stop for review. Later photos retain the existing unit's slug. See [Unit URLs](../README.md#unit-urls).
 

@@ -1,0 +1,38 @@
+{
+  "original": "PXL_20260403_070357526.jpg",
+  "original_sha256": "e6937b174d7e0b3ae9e162e7926b6dc83670f58495463399b7066135f93d9078",
+  "taken_on": "2026-04-03",
+  "site": {
+    "site_code": "CHS0004",
+    "street_address": "80 Clapham High Street, London",
+    "postcode": "SW4 7UL",
+    "notes": "Full address supplied by the project owner. Street number 80 is visible on the fascia. Camera GPS is not a verified coordinate of the premises; site coordinates remain unset."
+  },
+  "unit": {
+    "unit_code": "CHS0004-U01",
+    "label": "Former Elements Sushi restaurant at 80 Clapham High Street",
+    "frontage_notes": "Bright yellow fascia and side panels frame a glass shopfront with red sushi logos. Posters cover the central doors; the retained sign reads elements sushi. valid_from records the first observed configuration in this archive, not the creation date of the unit."
+  },
+  "business": {
+    "name": "Elements Sushi",
+    "normalised_name": "elements sushi",
+    "type": "Japanese restaurant",
+    "is_chain": 1,
+    "website": null,
+    "notes": "The project owner confirms Elements Sushi had closed at 80 Clapham High Street by the photograph on 2026-04-03. The exact final trading day is unknown. This Is Clapham's article https://www.thisisclapham.co.uk/elements-sushi-arrives-in-clapham/ announces the Clapham restaurant had opened following success at its Streatham branch. The page gives an initial publication date of 2024-07-03 and an updated date of 2024-07-19 (checked 2026-10-29). The publication date is not an established opening day. is_chain = 1 records the Clapham and Streatham branches described in this contemporary source, not a claim that either was trading on the photograph date. No standalone website or social profile has been supplied or verified."
+  },
+  "observation": {
+    "status": "vacant",
+    "name_as_displayed": "elements sushi",
+    "confidence": "high",
+    "observer": null,
+    "notes": "The project owner confirms the restaurant had closed by the photograph date. The yellow fascia and sushi logos remain on the glass frontage; their presence does not mean the restaurant was trading. No exact closure date or successor business is established."
+  },
+  "occupancy_notes": "Vacancy documented on 2026-04-03, based on the project owner's confirmation of closure by the photograph date. Former occupant: Elements Sushi, a Japanese restaurant announced as having opened in a This Is Clapham article dated 2024-07-03. The exact opening and closing days remain unknown. No precisely dated historical occupied period is invented. business_id is null for the vacant period; the observation identifies the former restaurant independently.",
+  "photo": {
+    "source_url": null,
+    "attribution": null,
+    "caption": "The former Elements Sushi restaurant at 80 Clapham High Street, London SW4 7UL, photographed on 3 April 2026 after closure. Its bright yellow fascia and red sushi logos remain above the glass frontage, with posters covering the central doors.",
+    "notes": "EXIF DateTimeOriginal is 2026:04:03 08:03:57 with OffsetTimeOriginal +01:00. Address and closure by this date supplied by the project owner. The opening article is evidence about the business, not the source of this photograph. Photographer credit and a post URL for this photograph remain unset."
+  }
+}

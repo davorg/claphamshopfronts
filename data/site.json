@@ -19,6 +19,124 @@
           "source_label": "Opening-date reel on Instagram"
         }
       ]
+    },
+    {
+      "unit_code": "CHS0002-U01",
+      "sourced_events": [
+        {
+          "date": "2026-05-01",
+          "title": "Dentons: Clapham shop closes",
+          "description": "Dentons announced that its Clapham High Street shop closed on Friday 1 May 2026 after 90 years on the street. The business continued from new premises in South Wimbledon, without a public-facing shop.",
+          "source_url": "https://www.linkedin.com/posts/denton%27s-catering-equipment-limited_dentons-onthemove-endofanera-activity-7456976259806445568-FUzm",
+          "source_label": "Dentons closure and relocation announcement on LinkedIn"
+        }
+      ]
+    },
+    {
+      "unit_code": "CHS0003-U01",
+      "confirmed_closures": [
+        {
+          "business_normalised_name": "bubba oasis",
+          "observed_on": "2026-04-03"
+        }
+      ],
+      "reported_events": [
+        {
+          "date": "2025-09-29",
+          "title": "Bubba Oasis: closure reported",
+          "description": "A Best of Clapham community post, dated 29 September 2025 by the project owner, reported that Bubba Oasis had closed. It described the venue as having opened in July 2023. The owner supplied the post's wording; we have not independently retrieved it. Neither the exact opening day nor the final trading day is established.",
+          "source_url": "https://www.threads.com/@bestofclaphamldn/post/DPL5bFwguHK/",
+          "source_label": "Community closure report on Threads"
+        }
+      ]
+    },
+    {
+      "unit_code": "CHS0004-U01",
+      "confirmed_closures": [
+        {
+          "business_normalised_name": "elements sushi",
+          "observed_on": "2026-04-03"
+        }
+      ],
+      "sourced_events": [
+        {
+          "date": "2024-07-03",
+          "title": "Elements Sushi: opening announced",
+          "description": "This Is Clapham published an article announcing that Elements Sushi had opened in Clapham, following its Streatham branch. This is the article's publication date; the exact opening day is not established.",
+          "source_url": "https://www.thisisclapham.co.uk/elements-sushi-arrives-in-clapham/",
+          "source_label": "Opening announcement from This Is Clapham"
+        }
+      ]
+    },
+    {
+      "unit_code": "CHS0005-U01",
+      "confirmed_closures": [
+        {
+          "business_normalised_name": "fruit & more",
+          "observed_on": "2026-04-03"
+        }
+      ]
+    },
+    {
+      "unit_code": "CHS0006-U01",
+      "reported_events": [
+        {
+          "date": "2025-12-12",
+          "title": "The Rattlin' Bog: reported opening",
+          "description": "The project owner reports that the pub's own Instagram announcement gives 12 December 2025 as its opening date. A London Pub Map post also places the opening in December 2025. We have not independently retrieved these posts, so the precise date remains unconfirmed.",
+          "source_url": "https://www.instagram.com/p/DR2P-oWiAl9/",
+          "source_label": "The pub's opening announcement on Instagram"
+        }
+      ]
+    },
+    {
+      "unit_code": "CHS0007-U01",
+      "confirmed_closures": [
+        {"business_normalised_name": "jeannette fashions", "observed_on": "2026-04-03"}
+      ],
+      "sourced_events": [
+        {
+          "date": "2020",
+          "title": "Jeannette Fashions closes",
+          "description": "Jim Grover's Behind the Shop Facade documents the family haberdashery and its end with Maurice Dorfman's death in 2020. The project owner confirms the shop closed immediately after his death. The exact final trading day is not established.",
+          "source_url": "https://www.behindtheshopfacade.com/the-story",
+          "source_label": "Jim Grover's Behind the Shop Facade photo-essay"
+        }
+      ],
+      "reported_events": [
+        {
+          "date": "2026-10-29",
+          "title": "Building works reported",
+          "description": "The project owner reports major building works at numbers 20 and 22. This is the report date, not an established start date for the works or evidence of a completed new shop configuration."
+        }
+      ]
+    },
+    {
+      "unit_code": "CHS0008-U01",
+      "confirmed_closures": [
+        {"business_normalised_name": "elvira graham", "observed_on": "2026-04-03"}
+      ],
+      "sourced_events": [
+        {
+          "date": "2020",
+          "title": "Maurice Dorfman dies",
+          "description": "Jim Grover's photo-essay records Maurice Dorfman's death in 2020 and the history of neighbouring Jeannette Fashions. The project owner states that Dorfman owned both shops and that Elvira continued here while inheritance arrangements were resolved.",
+          "source_url": "https://www.behindtheshopfacade.com/the-story",
+          "source_label": "Jim Grover's Behind the Shop Facade photo-essay"
+        }
+      ],
+      "reported_events": [
+        {
+          "date": "2025-12",
+          "title": "Elvira Graham leaves these premises",
+          "description": "The project owner reports that Elvira left in December 2025. The exact final trading day is unknown; this does not establish whether the designer continued elsewhere."
+        },
+        {
+          "date": "2026-10-29",
+          "title": "Building works reported",
+          "description": "The project owner reports major building works at numbers 20 and 22. This is the report date, not an established start date for the works or evidence of a completed new shop configuration."
+        }
+      ]
     }
   ]
 }

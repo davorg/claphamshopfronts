@@ -96,6 +96,10 @@ sub ingest ($self, $manifest_path, %options) {
   my $taken_on = "$year-$month-$day";
   display_date($taken_on);
   die "Manifest date does not match EXIF DateTimeOriginal\n" unless $taken_on eq $data->{taken_on};
+  if (defined $data->{occupancy_valid_to}) {
+    display_date($data->{occupancy_valid_to});
+    die "Occupancy end date precedes the photograph\n" if $data->{occupancy_valid_to} lt $taken_on;
+  }
   my $offset = $exif->{OffsetTimeOriginal} // 'offset not recorded';
   my $observation = $data->{observation};
   my $status = $observation->{status};
@@ -112,6 +116,9 @@ sub ingest ($self, $manifest_path, %options) {
     }
   }
   (my $stem = $name) =~ s/\.[^.]+$//;
+  my $shared_from = $data->{share_image_from};
+  die "share_image_from must name a different unit code\n"
+    if defined $shared_from && (ref $shared_from || $shared_from !~ /^[A-Za-z0-9-]+$/ || $shared_from eq $data->{unit}{unit_code});
   my $filename = "photos/$year/$month/$stem.webp";
   my $thumbnail = "photos/$year/$month/$stem-small.webp";
   my $large = $root->child('docs/images', $filename);
@@ -123,15 +130,25 @@ sub ingest ($self, $manifest_path, %options) {
   my @created;
   my $work = sub {
     my @existing = $schema->resultset('Photo')->search({filename => $filename})->all;
+    my $reuse_images = 0;
     if (@existing) {
       die "Published image path belongs to a different photo record\n"
-        unless @existing == 1 && $existing[0]->taken_on eq $taken_on && index($existing[0]->notes // '', $marker) >= 0;
+        if grep {$_->taken_on ne $taken_on || index($_->notes // '', $marker) < 0} @existing;
       die "Existing photo record is missing its generated image copies\n" unless $large->is_file && $small->is_file;
-      return {%$summary, result => 'already_ingested', photo_id => $existing[0]->id};
+      my @matching = grep {$_->unit && $_->unit->unit_code eq $data->{unit}{unit_code}} @existing;
+      die "Multiple photo records already exist for this unit and image\n" if @matching > 1;
+      return {%$summary, result => 'already_ingested', photo_id => $matching[0]->id} if @matching;
+      die "Image already belongs to another unit; explicit share_image_from is required\n"
+        unless defined $shared_from && grep {$_->unit && $_->unit->unit_code eq $shared_from} @existing;
+      $reuse_images = 1;
+    } else {
+      die "Shared image source must be ingested first\n" if defined $shared_from;
+      die "Original is processed but has no matching database record\n" if "$source" eq "$processed";
+      die "A generated image path already exists; refusing to overwrite it\n" if $large->exists || $small->exists;
     }
-    die "Original is processed but has no matching database record\n" if "$source" eq "$processed";
-    die "A generated image path already exists; refusing to overwrite it\n" if $large->exists || $small->exists;
     my $plan = $self->observation_plan($schema, $data, $taken_on);
+    die "Ending an existing occupancy needs manual review\n"
+      if defined $data->{occupancy_valid_to} && $plan->{action} eq 'same_occupancy';
     return {%$summary, result => 'dry_run', timeline_action => $plan->{action}, slug => $plan->{slug}} if $options{dry_run};
 
     my $site_data = $data->{site};
@@ -162,7 +179,8 @@ sub ingest ($self, $manifest_path, %options) {
       }
       $unit->create_related('occupancies', {
         business_id => $status eq 'occupied' ? $business->id : undef, occupancy_status => $status,
-        valid_from => $taken_on, name_as_displayed => $observation->{name_as_displayed}, notes => $data->{occupancy_notes},
+        valid_from => $taken_on, valid_to => $data->{occupancy_valid_to},
+        name_as_displayed => $observation->{name_as_displayed}, notes => $data->{occupancy_notes},
       });
     }
     my $photo = $unit->create_related('photos', {
@@ -170,14 +188,16 @@ sub ingest ($self, $manifest_path, %options) {
       (map {$_ => $data->{photo}{$_}} qw(source_url attribution caption)),
       notes => "Original: $name\n$marker\nEXIF captured: $captured ($offset)\n$data->{photo}{notes}",
     });
-    $large->parent->mkpath;
-    my $temporary = path(tempdir('.ingest-XXXXXX', DIR => "" . $large->parent, CLEANUP => 1));
-    for my $copy ([$large, 1600], [$small, 640]) {
-      my ($destination, $limit) = @$copy;
-      my $staged = $temporary->child($destination->basename);
-      $self->write_image($source, $staged, $limit);
-      $staged->move($destination);
-      push @created, $destination;
+    unless ($reuse_images) {
+      $large->parent->mkpath;
+      my $temporary = path(tempdir('.ingest-XXXXXX', DIR => "" . $large->parent, CLEANUP => 1));
+      for my $copy ([$large, 1600], [$small, 640]) {
+        my ($destination, $limit) = @$copy;
+        my $staged = $temporary->child($destination->basename);
+        $self->write_image($source, $staged, $limit);
+        $staged->move($destination);
+        push @created, $destination;
+      }
     }
     return {%$summary, result => 'ingested', photo_id => $photo->id, timeline_action => $plan->{action}};
   };

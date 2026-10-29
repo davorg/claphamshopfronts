@@ -49,6 +49,8 @@ subtest 'image base changes without database migration' => sub {
     qr{src="https://images.claphamshopfronts.com/photos/2026/04/sample.webp"}, 'record uses configured host';
   like $root->child('docs/index.html')->slurp_utf8,
     qr{src="https://images.claphamshopfronts.com/photos/2026/04/sample-small.webp"}, 'homepage uses configured host';
+  like $root->child('docs/photos/index.html')->slurp_utf8,
+    qr{src="https://images.claphamshopfronts.com/photos/2026/04/sample-small.webp"}, 'archive uses configured host';
   is file_sha($root->child('db/claphamshopfront.db')), $before, 'database unchanged';
 };
 
@@ -66,7 +68,10 @@ subtest 'missing image stops the build before output changes' => sub {
 subtest 'recent photos sort by capture date, not insertion order' => sub {
   my ($root, $schema) = fixture();
   my $photo = seed_page($root, $schema);
-  $schema->resultset('Photo')->create({unit_id => 1, taken_on => '2026-03-01', source_type => 'own_photo', filename => $photo->filename, caption => 'Older capture'});
+  for my $suffix ('.webp', '-small.webp') {
+    $root->child('docs/images/photos/2026/04', "sample$suffix")->copy($root->child('docs/images/photos/2026/04', "older$suffix"));
+  }
+  $schema->resultset('Photo')->create({unit_id => 1, taken_on => '2026-03-01', source_type => 'own_photo', filename => 'photos/2026/04/older.webp', caption => 'Older capture'});
   ClaphamShopfronts::Site->new(root => $root)->build;
   my $home = $root->child('docs/index.html')->slurp_utf8;
   my ($section) = $home =~ /BEGIN GENERATED RECENT PHOTOGRAPHS -->(.*?)<!-- END GENERATED/s;
@@ -112,6 +117,110 @@ subtest 'new occupant changes the latest record without relabelling earlier evid
   my ($recent) = $home =~ /BEGIN GENERATED RECENT PHOTOGRAPHS -->(.*?)<!-- END GENERATED/s;
   ok index($recent, '<h3>Tony Voyage</h3>') < index($recent, '<h3>Pure Vintage</h3>'), 'homepage places the new photograph first';
   like $recent, qr{href="shopfronts/sw4-7ts-7/#photo-1"}, 'old card links to old photo rather than only the latest view';
+};
+
+subtest 'published history is distinguished from unconfirmed reports and photo observations' => sub {
+  my ($root, $schema) = fixture();
+  seed_page($root, $schema);
+  my $config = ClaphamShopfronts::Util::read_json($root->child('data/site.json'));
+  $config->{shopfronts}[0]{sourced_events} = [{
+    date => '2020', title => 'Published closure announcement',
+    description => 'The business confirms its final trading day at this address.',
+    source_url => 'https://example.com/closure', source_label => 'Company announcement',
+  }];
+  push @{$config->{shopfronts}[0]{reported_events}}, {
+    date => '2025-12', title => 'Departure reported by owner', description => 'Reported departure month; exact day unknown.',
+  };
+  ClaphamTest::save_json($root->child('data/site.json'), $config);
+  ClaphamShopfronts::Site->new(root => $root)->build;
+  my $page = $root->child('docs/shopfronts/sw4-7ts-7/index.html')->slurp_utf8;
+  like $page, qr{Published source</span>\s*<h3>Published closure announcement</h3>}, 'sourced event has its own evidence label';
+  like $page, qr{href="https://example.com/closure">Company announcement}, 'source is publicly linked';
+  like $page, qr{Reported · unconfirmed}, 'separate unconfirmed event keeps its label';
+  like $page, qr{<time datetime="2020">2020</time>}, 'year-only evidence keeps its precision';
+  like $page, qr{<time datetime="2025-12">December 2025</time>}, 'month-only owner report needs no invented day or source URL';
+  unlike $page, qr{2025-12-01|2020-01-01}, 'no exact dates invented';
+  is $schema->resultset('Observation')->count, 1, 'published event does not fabricate a photo observation';
+  $config->{shopfronts}[0]{reported_events}[-1]{date} = '2025-13';
+  ClaphamTest::save_json($root->child('data/site.json'), $config);
+  eval {ClaphamShopfronts::Site->new(root => $root)->build};
+  like $@, qr/Invalid ISO date|Invalid date|Month/, 'invalid partial date rejected';
+};
+
+subtest 'shared image appears on both unit pages but once among recent photographs' => sub {
+  my ($root, $schema) = fixture();
+  my $photo = seed_page($root, $schema);
+  my $site = $schema->resultset('Site')->create({site_code => 'CHS0002', street_address => '9 Clapham High Street, London', postcode => 'SW4 7TS'});
+  my $unit = $site->create_related('units', {unit_code => 'CHS0002-U01', slug => 'sw4-7ts-9', valid_from => '2026-04-03'});
+  my $observation = $unit->create_related('observations', {observed_on => '2026-04-03', observed_status => 'vacant', observed_business_name => 'Neighbour'});
+  $unit->create_related('photos', {observation_id => $observation->id, filename => $photo->filename, taken_on => $photo->taken_on, source_type => 'own_photo', caption => 'The neighbouring shop on the right.'});
+  my $config = ClaphamShopfronts::Util::read_json($root->child('data/site.json'));
+  push @{$config->{shopfronts}}, {unit_code => 'CHS0002-U01'};
+  ClaphamTest::save_json($root->child('data/site.json'), $config);
+  my $result = ClaphamShopfronts::Site->new(root => $root)->build;
+  is $result->{shopfront_pages}, 2, 'both unit pages built';
+  is $result->{recent_photographs}, 1, 'shared image not repeated on homepage';
+  is $result->{archive_photographs}, 1, 'shared image not repeated in archive';
+  my $archive = $root->child('docs/photos/index.html')->slurp_utf8;
+  like $archive, qr{href="../shopfronts/sw4-7ts-9/#photo-2"}, 'archive links to second unit and its photo';
+  like $archive, qr{href="../shopfronts/sw4-7ts-7/#photo-1"}, 'archive also links to first unit and its photo';
+  is scalar(() = $archive =~ /class="photo-archive-card"/g), 1, 'one gallery card for shared image';
+  like $root->child('docs/shopfronts/sw4-7ts-9/index.html')->slurp_utf8, qr{<h1>Neighbour</h1>}, 'second page keeps its own identity';
+  like $root->child('docs/shopfronts/sw4-7ts-7/index.html')->slurp_utf8, qr{<h1>Pure Vintage</h1>}, 'first page keeps its own identity';
+};
+
+subtest 'complete archive is chronological, escaped and linked from every page' => sub {
+  my ($root, $schema) = fixture();
+  my $seed = seed_page($root, $schema);
+  my @dates = qw(2026-01-10 2026-05-15 2026-03-02 2026-02-20);
+  for my $i (0 .. $#dates) {
+    for my $suffix ('.webp', '-small.webp') {
+      $root->child('docs/images/photos/2026/04', "sample$suffix")->copy($root->child('docs/images/photos/2026/04', "extra-$i$suffix"));
+    }
+    $schema->resultset('Photo')->create({unit_id => 1, observation_id => $seed->observation_id,
+      taken_on => $dates[$i], source_type => 'own_photo', filename => "photos/2026/04/extra-$i.webp",
+      caption => '<script>Private markup & quoted "caption"</script>'});
+  }
+  my $hidden = $schema->resultset('Unit')->create({site_id => 1, unit_code => 'UNPUBLISHED', slug => 'unpublished', valid_from => '2026-04-03'});
+  $hidden->create_related('photos', {taken_on => '2026-10-29', source_type => 'own_photo', filename => 'not-published.webp', caption => 'Unpublished photograph'});
+  my $before = file_sha($root->child('db/claphamshopfront.db'));
+  my $builder = ClaphamShopfronts::Site->new(root => $root);
+  my $result = $builder->build;
+  is $result->{archive_photographs}, 5, 'all five published photographs included';
+  is $result->{recent_photographs}, 3, 'homepage still limited to three';
+  my $archive_file = $root->child('docs/photos/index.html');
+  my $archive = $archive_file->slurp_utf8;
+  is_deeply [($archive =~ /<time datetime="([^"]+)"/g)], [qw(2026-05-15 2026-04-03 2026-03-02 2026-02-20 2026-01-10)], 'sorted by capture date rather than insertion order';
+  like $archive, qr{href="../shopfronts/sw4-7ts-7/#photo-1"}, 'old photograph retains its own unit anchor';
+  like $archive, qr{&lt;script&gt;Private markup &amp; quoted &quot;caption&quot;&lt;/script&gt;}, 'photo captions escaped in image attributes';
+  unlike $archive, qr{<script>Private markup|Unpublished photograph|not-published.webp}, 'markup and unpublished photographs excluded';
+  like $archive, qr{href="../styles.css"}, 'archive stylesheet resolves from its depth';
+  like $archive, qr{href="../#the-project"}, 'archive navigation links back to homepage sections';
+  like $archive, qr{href="../photos/" aria-current="page">All photos}, 'active archive link indicated';
+  like $archive, qr{rel="canonical" href="https://claphamshopfronts.com/photos/"}, 'archive canonical URL';
+  my $home = $root->child('docs/index.html')->slurp_utf8;
+  like $home, qr{<a href="photos/">All photos</a>}, 'homepage top navigation links to gallery';
+  like $home, qr{class="all-photos-link" href="photos/"}, 'recent section links to complete archive';
+  my $unit = $root->child('docs/shopfronts/sw4-7ts-7/index.html')->slurp_utf8;
+  like $unit, qr{<a href="../../photos/">All photos</a>}, 'unit navigation links to gallery at correct depth';
+  like $unit, qr{class="archive-back" href="../../photos/"}, 'unit back link returns to gallery';
+  is file_sha($root->child('db/claphamshopfront.db')), $before, 'archive build leaves database untouched';
+  $archive_file->append_utf8('stale gallery');
+  eval {$builder->build(check => 1)};
+  like $@, qr{photos/index.html}, 'check mode detects stale archive output';
+  $builder->build;
+  is_deeply $builder->build(check => 1)->{changed_files}, [], 'rebuild restores current archive output';
+};
+
+subtest 'empty archive renders without needing a published unit' => sub {
+  my ($root) = fixture();
+  my $config = ClaphamShopfronts::Util::read_json($root->child('data/site.json'));
+  $config->{shopfronts} = [];
+  ClaphamTest::save_json($root->child('data/site.json'), $config);
+  my $result = ClaphamShopfronts::Site->new(root => $root)->build;
+  is $result->{archive_photographs}, 0, 'empty archive count';
+  is $result->{shopfront_pages}, 0, 'no phantom unit pages';
+  like $root->child('docs/photos/index.html')->slurp_utf8, qr{Check back soon for our first shopfronts}, 'empty message shown';
 };
 
 done_testing;

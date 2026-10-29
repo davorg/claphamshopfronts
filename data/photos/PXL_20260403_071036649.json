@@ -1,0 +1,38 @@
+{
+  "original": "PXL_20260403_071036649.jpg",
+  "original_sha256": "b5092730fef498f86518b8ec6e81ae4d8902d87f1b9e0f3dd6cd73e1a9162de2",
+  "taken_on": "2026-04-03",
+  "site": {
+    "site_code": "CHS0006",
+    "street_address": "4 Clapham Common South Side, London",
+    "postcode": "SW4 7AA",
+    "notes": "Full address supplied by the project owner. Camera GPS is not a verified coordinate of the premises; site coordinates remain unset."
+  },
+  "unit": {
+    "unit_code": "CHS0006-U01",
+    "label": "Pub at 4 Clapham Common South Side",
+    "frontage_notes": "A narrow green pub frontage with a dark fascia reading THE RATTLIN' BOG, bottle displays, a bicycle mounted above the sign, Guinness signs and an Irish flag. valid_from records the first observed configuration in this archive, not when the unit was created or the pub opened."
+  },
+  "business": {
+    "name": "The Rattlin' Bog",
+    "normalised_name": "the rattlin' bog",
+    "type": "Pub",
+    "is_chain": 0,
+    "website": "https://www.instagram.com/therattlinbogclapham/",
+    "notes": "The project owner confirms the pub had opened and was trading by the photograph on 2026-04-03. The owner reports that the pub's own Instagram announcement https://www.instagram.com/p/DR2P-oWiAl9/ gives an opening date of 2025-12-12. A separate London Pub Map post https://www.instagram.com/p/DZsqDWXkXsg/ reportedly places opening in December 2025. These posts and the supplied pub profile could not be independently retrieved on 2026-10-29, so the precise opening date is retained as a sourced owner report awaiting independent confirmation. No earlier name or historic occupant has been supplied. No multiple retail branches have been established; is_chain remains 0."
+  },
+  "observation": {
+    "status": "occupied",
+    "name_as_displayed": "THE RATTLIN' BOG",
+    "confidence": "high",
+    "observer": null,
+    "notes": "The project owner confirms the pub had opened by the photograph date. The photograph shows a fitted, illuminated pub with green panelling, bottle displays, Guinness signs and the named fascia. Occupied records a trading business at this date, not a claim that it was serving customers at the EXIF time of 08:10."
+  },
+  "occupancy_notes": "The Rattlin' Bog occupied this pub when photographed on 2026-04-03, as confirmed by the project owner. valid_from is the first observation in this archive, not an opening date. The owner reports a 2025-12-12 opening announcement from the pub's Instagram, supported at month level by a London Pub Map post. The opening date is recorded separately as a reported timeline event; no unphotographed historical observation is invented.",
+  "photo": {
+    "source_url": null,
+    "attribution": null,
+    "caption": "The Rattlin' Bog at 4 Clapham Common South Side, London SW4 7AA, photographed on 3 April 2026 after it had opened. The green pub frontage has bottle displays, Guinness signs, an Irish flag and a bicycle mounted above its sign.",
+    "notes": "EXIF DateTimeOriginal is 2026:04:03 08:10:36 with OffsetTimeOriginal +01:00. Address and trading status supplied by the project owner. The two Instagram posts concern the pub's opening, not the source of this photograph. Photographer credit and a post URL for this photograph remain unset."
+  }
+}

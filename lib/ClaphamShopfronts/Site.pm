@@ -33,7 +33,15 @@ sub fragment ($document, $pattern) {
   return $matches[0];
 }
 
-sub page_head ($home, $fields) {
+sub page_header ($home, $prefix, $current = '') {
+  my $header = fragment($home, qr{<header class="site-header wrap">.*?</header>}s);
+  $header =~ s{href="\./"}{'href="' . $prefix . '"'}ge;
+  $header =~ s{href="#([^"]+)"}{'href="' . $prefix . '#' . $1 . '"'}ge;
+  $header =~ s{href="photos/"}{'href="' . $prefix . 'photos/"' . ($current eq 'photos' ? ' aria-current="page"' : '')}ge;
+  return $header;
+}
+
+sub page_head ($home, $fields, $prefix = '../../') {
   my $head = fragment($home, qr{<head>.*?</head>}s);
   my $count = $head =~ s{<title>.*?</title>}{'<title>' . html($fields->{title}) . '</title>'}se;
   die "Expected one homepage title\n" unless $count == 1;
@@ -44,7 +52,7 @@ sub page_head ($home, $fields) {
     $count = $head =~ s{(<meta (?:name|property)="\Q$key\E" content=")[^"]*(">)}{$1 . html($metadata{$key}) . $2}ge;
     die "Expected one homepage meta tag for $key\n" unless $count == 1;
   }
-  $head =~ s{href="styles.css"}{href="../../styles.css"}g;
+  $head =~ s{href="styles.css"}{'href="' . $prefix . 'styles.css"'}ge;
   $head =~ s{</head>}{'  <link rel="canonical" href="' . html($fields->{canonical}) . qq{">\n</head>}}e;
   return $head;
 }
@@ -69,11 +77,26 @@ sub photo_assets ($self, $photo, $base) {
   };
 }
 
+sub history_date ($value) {
+  return $value if defined $value && $value =~ /^[1-9][0-9]{3}$/;
+  if (defined $value && $value =~ /^[1-9][0-9]{3}-(?:0[1-9]|1[0-2])$/) {
+    my $display = display_date("$value-01");
+    $display =~ s/^1 //;
+    return $display;
+  }
+  return display_date($value);
+}
+
 sub history ($publication, $photos) {
   my @events;
   for my $event (@{$publication->{reported_events} // []}) {
-    push @events, {%$event, display_date => display_date($event->{date}),
-      source_url => web_url($event->{source_url}), reported => 1};
+    push @events, {%$event, display_date => history_date($event->{date}),
+      source_url => $event->{source_url} ? web_url($event->{source_url}) : '',
+      source_label => $event->{source_label} // '', reported => 1};
+  }
+  for my $event (@{$publication->{sourced_events} // []}) {
+    push @events, {%$event, display_date => history_date($event->{date}),
+      source_url => web_url($event->{source_url}), reported => 0};
   }
   my %closed;
   for my $closure (@{$publication->{confirmed_closures} // []}) {
@@ -89,13 +112,13 @@ sub history ($publication, $photos) {
     my $description = $photo->{caption};
     if ($closed{$photo->{id}}) {
       $title = $photo->{business_name} . ': closed by this date';
-      $description = 'The project photographer confirms ' . $photo->{business_name} . ' had permanently closed by the time this photograph was taken. The exact closing date is unknown.';
+      $description = 'The project photographer confirms ' . $photo->{business_name} . ' had ceased trading at this address by the time this photograph was taken. The exact closing date is unknown.';
     } elsif (($photo->{observed_status} // '') eq 'occupied') {
       $title = $photo->{business_name} . ' photographed here';
       $description .= ' This documents the business on the photograph date, not its opening date.';
     }
     push @events, {date => $photo->{taken_on}, display_date => $photo->{photograph_date},
-      reported => 0, title => $title, description => $description};
+      reported => 0, source_url => '', source_label => '', title => $title, description => $description};
   }
   return [sort {$a->{date} cmp $b->{date}} @events];
 }
@@ -108,9 +131,7 @@ sub build ($self, %options) {
   my $base = image_base($options{image_base} // $config->{image_base});
   my $home_path = $root->child('docs/index.html');
   my $home = $home_path->slurp_utf8;
-  my $header = fragment($home, qr{<header class="site-header wrap">.*?</header>}s);
-  $header =~ s{href="\./"}{href="../../"}g;
-  $header =~ s{href="#([^"]+)"}{href="../../#$1"}g;
+  my $header = page_header($home, '../../');
   my $footer = fragment($home, qr{<footer class="site-footer wrap">.*?</footer>}s);
   my $schema = ClaphamShopfronts::Schema->connect_database($root->child('db/claphamshopfront.db'), read_only => 1);
   my (%outputs, @recent);
@@ -182,8 +203,33 @@ sub build ($self, %options) {
     push @recent, @photos;
   }
   $schema->storage->disconnect;
+  my $unit_pages = scalar keys %outputs;
   @recent = sort {$b->{taken_on} cmp $a->{taken_on} || $b->{id} <=> $a->{id}} @recent;
+  my (%by_image, @archive);
+  for my $photo (@recent) {
+    unless ($by_image{$photo->{filename}}) {
+      my $group = {%$photo, subjects => []};
+      $by_image{$photo->{filename}} = $group;
+      push @archive, $group;
+    }
+    push @{$by_image{$photo->{filename}}{subjects}}, $photo;
+  }
+  @recent = map {$_->{subjects}[0]} @archive;
   splice @recent, 3 if @recent > 3;
+
+  my $latest = $archive[0];
+  my $archive_fields = {
+    title => 'All photos — Clapham Shopfronts',
+    caption => 'Explore the photographic archive of Clapham shopfronts, newest first. Follow each photograph to its address and story.',
+    canonical => "$site_url/photos/",
+    social_image => $latest ? ($latest->{image_url} =~ m{^/} ? $site_url . $latest->{image_url} : $latest->{image_url}) : "$site_url/images/hero-collage.webp",
+    image_width => $latest ? $latest->{image_width} : 1200,
+    image_height => $latest ? $latest->{image_height} : 630,
+  };
+  $outputs{"" . $root->child('docs/photos/index.html')} = $self->render('all-photos.tt', {
+    head => page_head($home, $archive_fields, '../'), header => page_header($home, '../', 'photos'), footer => $footer,
+    photos => \@archive, photo_count => scalar @archive,
+  });
   my $recent = @recent ? $self->render('recent-photographs.tt', {photos => \@recent}) : '';
   my $count = $home =~ s{\Q$START\E.*?\Q$END\E}{$START . "\n" . $recent . "\n    " . $END}se;
   die "Expected one generated recent-photographs section in the homepage\n" unless $count == 1;
@@ -196,7 +242,7 @@ sub build ($self, %options) {
       path($file)->spew_utf8($outputs{$file});
     }
   }
-  return {shopfront_pages => scalar(keys %outputs) - 1, recent_photographs => scalar @recent,
+  return {shopfront_pages => $unit_pages, archive_photographs => scalar @archive, recent_photographs => scalar @recent,
     changed_files => [map {"" . path($_)->relative($root)} @changed]};
 }
 

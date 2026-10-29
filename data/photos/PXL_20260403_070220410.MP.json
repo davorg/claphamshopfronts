@@ -1,0 +1,38 @@
+{
+  "original": "PXL_20260403_070220410.MP.jpg",
+  "original_sha256": "52b98bbf8a7f0f71951710b7c153351eb376722452416752d0de9fc058b8c12d",
+  "taken_on": "2026-04-03",
+  "site": {
+    "site_code": "CHS0003",
+    "street_address": "44-48 Clapham High Street, London",
+    "postcode": "SW4 7UR",
+    "notes": "Address supplied by the project owner and corroborated by the local BID directory: https://www.thisisclapham.co.uk/business/bubba-oasis/ . Camera GPS is not a verified coordinate of the premises; site coordinates remain unset."
+  },
+  "unit": {
+    "unit_code": "CHS0003-U01",
+    "label": "Former Bubba Oasis venue at 44-48 Clapham High Street",
+    "frontage_notes": "One venue spans the 44-48 address range, with pale blue panelling, rows of windows, a dark entrance and an awning reading Clapham's Clubhouse. Forge is the property agent on the projecting board, not the occupant. No split or merger is established. valid_from records the first observed configuration in this archive, not the creation date of the unit."
+  },
+  "business": {
+    "name": "Bubba Oasis",
+    "normalised_name": "bubba oasis",
+    "type": "Bar and café",
+    "is_chain": 1,
+    "website": "https://bubbaoasis.com/",
+    "notes": "The project owner identifies the former venue as Bubba Oasis and confirms it was closed by the photograph on 2026-04-03. Forge is the agent selling the property, not the venue name. The local BID directory describes a neighbourhood clubhouse with co-working, cocktails, music and events: https://www.thisisclapham.co.uk/business/bubba-oasis/ (checked 2026-10-29). Multi-site classification records the known Clapham and Islington locations: the current brand website https://bubbaoasis.com/ describes Islington; this is not a claim that both venues traded on the photograph date. The project owner supplied a community post at https://www.threads.com/@bestofclaphamldn/post/DPL5bFwguHK/ and its publication date, 2025-09-29. Its supplied text reports the Clapham venue had closed and that it opened in July 2023. The post could not be independently retrieved. September 29 is the report date, not an established final trading day; July 2023 is a reported opening month, not a precise date. No historical occupied period is invented."
+  },
+  "observation": {
+    "status": "vacant",
+    "name_as_displayed": "Clapham's Clubhouse",
+    "confidence": "high",
+    "observer": null,
+    "notes": "The project owner identifies the former business as Bubba Oasis and confirms it was closed by the photo date. The property agent's Forge board is visible; it is not a trading business at the premises. The awning retains Clapham's Clubhouse wording and a cocktails sign. These signs do not establish that the venue was still trading. A community closure report dated 2025-09-29 was supplied separately by the owner."
+  },
+  "occupancy_notes": "Vacancy documented on 2026-04-03, based on the project owner's confirmation that the former Bubba Oasis venue had closed and the property was being marketed by Forge. The community Threads post supplied by the owner reported closure by 2025-09-29; the exact final trading day remains unknown. This period begins with the photographed vacancy, not a guessed closure day. business_id is null for the vacant period; the photo observation independently identifies Bubba Oasis as the former business.",
+  "photo": {
+    "source_url": null,
+    "attribution": null,
+    "caption": "The former Bubba Oasis venue at 44-48 Clapham High Street, London SW4 7UR, photographed on 3 April 2026 after closure. The pale blue frontage retains its Clapham's Clubhouse awning, with a Forge property agency board above the entrance.",
+    "notes": "EXIF DateTimeOriginal is 2026:04:03 08:02:20 with OffsetTimeOriginal +01:00. The original phone filename uses UTC. Address, former business identity and closure by this date were confirmed by the project owner. The Threads post is evidence about the venue's history, not the source of this photograph. Photographer credit and a post URL for this photograph remain unset."
+  }
+}
