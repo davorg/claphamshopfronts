@@ -10,6 +10,8 @@ use URI::Escape qw(uri_escape_utf8);
 use ClaphamShopfronts::Schema;
 use ClaphamShopfronts::Util qw(read_json display_date web_url image_base html image_size validate_slug);
 
+with 'ClaphamShopfronts::Role::ProjectRoot';
+
 my $START = '<!-- BEGIN GENERATED RECENT PHOTOGRAPHS -->';
 my $END = '<!-- END GENERATED RECENT PHOTOGRAPHS -->';
 my %STATUS = (
@@ -20,12 +22,6 @@ my %STATUS = (
   unknown             => 'State unknown'
 );
 
-has root => (
-  is       => 'ro',
-  isa      => 'Path::Tiny',
-  required => 1,
-);
-
 has tt => (
   is       => 'ro',
   isa      => 'Template',
@@ -33,14 +29,6 @@ has tt => (
   lazy     => 1,
   builder  => '_build_tt',
 );
-
-around BUILDARGS => sub ($original, $class, @arguments) {
-  my $arguments = $class->$original(@arguments);
-
-  $arguments->{root} = path($arguments->{root})->absolute if exists $arguments->{root};
-
-  return $arguments;
-};
 
 sub _build_tt ($self) {
   return Template->new({

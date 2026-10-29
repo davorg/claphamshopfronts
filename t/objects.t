@@ -22,6 +22,23 @@ for my $class (qw(ClaphamShopfronts::Ingest ClaphamShopfronts::Site)) {
     is "" . $from_hashref->root, "" . $object->root, 'hashref arguments and Path::Tiny roots also work';
     is "" . $arguments->{root}, '.', 'constructor does not modify caller arguments';
 
+    my $string_arguments = {root => '.'};
+    my $from_string = $class->new($string_arguments);
+
+    is "" . $from_string->root, "" . $object->root, 'hashref string roots also normalise';
+    is_deeply $string_arguments, {root => '.'}, 'caller-owned string arguments stay unchanged';
+
+    my $from_path = $class->new(root => path('.'));
+
+    is "" . $from_path->root, "" . $object->root, 'named Path::Tiny roots also normalise';
+
+    try {
+      $object->root(path('/tmp'));
+      fail 'project root is read-only';
+    } catch ($error) {
+      like $error, qr/read-only accessor/, 'project root is read-only';
+    }
+
     try {
       $class->new;
       fail 'project root is required';

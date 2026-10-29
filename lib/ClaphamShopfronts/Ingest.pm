@@ -11,19 +11,7 @@ use Image::Magick;
 use ClaphamShopfronts::Schema;
 use ClaphamShopfronts::Util qw(read_json file_sha display_date image_size unit_slug validate_slug);
 
-has root => (
-  is       => 'ro',
-  isa      => 'Path::Tiny',
-  required => 1,
-);
-
-around BUILDARGS => sub ($original, $class, @arguments) {
-  my $arguments = $class->$original(@arguments);
-
-  $arguments->{root} = path($arguments->{root})->absolute if exists $arguments->{root};
-
-  return $arguments;
-};
+with 'ClaphamShopfronts::Role::ProjectRoot';
 
 sub finish_original ($self, $source, $destination) {
   return if "$source" eq "$destination";

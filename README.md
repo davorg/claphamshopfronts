@@ -60,7 +60,7 @@ perl bin/ingest-photo.pl data/photos/PXL_20260403_065904338.json
 
 Rerunning an imported manifest reports `already_ingested` and does not create duplicate records. It is not a command for applying later corrections to a record. Application code lives in `lib/ClaphamShopfronts/`; DBIx::Class result classes map all eleven tables under `lib/ClaphamShopfronts/Schema/Result/`. SQLite continues to enforce the constraints and triggers in the DDL.
 
-The importer and page generator use Moose constructors and typed, read-only attributes. Each requires a `root` argument, accepting either a path string or a `Path::Tiny` object and normalising it to an absolute path. Both named arguments and a hash reference are supported.
+The importer and page generator use Moose constructors and typed, read-only attributes. Both compose `ClaphamShopfronts::Role::ProjectRoot`, which requires a `root` argument, accepts either a path string or a `Path::Tiny` object, and normalises it to an absolute path. Both named arguments and a hash reference are supported without modifying caller-owned arguments.
 
 If one photograph shows two units, ingest it for the first unit, then use a second manifest with the same original and checksum plus `share_image_from` naming that first unit's code. The importer reuses the archived original and both WebP copies, creating a separate photo/observation association for the second unit with its own caption and business identity. Each manifest can be rerun safely. Shared images appear once among recent homepage photographs. The Jeannette Fashions and Elvira Graham manifests show this workflow:
 
