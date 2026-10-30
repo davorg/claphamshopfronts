@@ -67,6 +67,11 @@ sub _page_data ($self, $fields, %options) {
       og_image_alt   => $fields->{image_alt} // $fields->{caption},
       image_width    => $fields->{image_width},
       image_height   => $fields->{image_height},
+      site_url       => $fields->{site_url},
+      page_kind      => $options{page_kind} // 'page',
+      photo_groups   => $options{photo_groups} // [],
+      premises       => $fields->{premises},
+      annotations    => $fields->{history} // [],
     ),
     prefix         => $prefix,
     home_url       => $prefix || './',
@@ -218,7 +223,9 @@ sub _load_photographs ($self, $schema, $unit) {
   return \@rows;
 }
 
-sub _prepare_photographs ($self, $rows, $site, $page_url, $base) {
+sub _prepare_photographs ($self, $rows, $unit, $page_url, $base, $site_url) {
+  my $site = $unit->site;
+  my $premises = $unit->structured_place($site_url);
   my @photos;
 
   for my $row (@$rows) {
@@ -251,7 +258,8 @@ sub _prepare_photographs ($self, $rows, $site, $page_url, $base) {
       business_normalised_name => $business ? $business->normalised_name : '',
       business_website         => $business ? ($business->website // '') : '',
       status_label             => $STATUS{$photo->{observed_status} // ''} // 'State not recorded',
-      display_name             => $photo->{observed_business_name} || $business_name
+      display_name             => $photo->{observed_business_name} || $business_name,
+      premises                 => $premises,
     };
   }
 
@@ -309,12 +317,13 @@ sub _unit_page_data ($self, $unit, $publication, $photos, $site_url, $page_url) 
 
   return {
     %$photo,
+    site_url       => $site_url,
     address        => $site->street_address,
     postcode       => $site->postcode // '',
     status_at_date => ($STATUS{$photo->{observed_status} // ''} // 'Not recorded') . ' when photographed',
     title          => $photo->{business_name} . ' — ' . $site->street_address . ' — Clapham Shopfronts',
     canonical      => "$site_url/$page_url",
-    social_image   => $photo->{image_url} =~ m{^/} ? $site_url . $photo->{image_url} : $photo->{image_url},
+    social_image   => $self->absolute_web_url($photo->{image_url}, "$site_url/"),
     history        => $self->history($publication, $photos),
     source_links   => $self->_source_links($photos),
     main_photo     => $photo,
@@ -324,15 +333,17 @@ sub _unit_page_data ($self, $unit, $publication, $photos, $site_url, $page_url) 
   };
 }
 
-sub _render_unit_page ($self, $data) {
+sub _render_unit_page ($self, $data, $groups) {
   return $self->render(
     'shopfront.tt', {
       %$data,
       page => $self->_page_data(
         $data,
-        prefix     => '../../',
-        body_class => 'shopfront-page',
-        scripts    => ['photo-modal.js'],
+        page_kind    => 'unit',
+        photo_groups => $groups,
+        prefix       => '../../',
+        body_class   => 'shopfront-page',
+        scripts      => ['photo-modal.js'],
       ),
     }
   );
@@ -359,12 +370,13 @@ sub _group_archive_photographs ($self, $photos) {
 sub _render_archive_page ($self, $archive, $site_url) {
   my $latest = $archive->[0];
   my $fields = {
+    site_url => $site_url,
     title   => 'All photos — Clapham Shopfronts',
     caption =>
       'Explore the photographic archive of Clapham shopfronts, newest first. Follow each photograph to its address and story.',
     canonical    => "$site_url/photos/",
     social_image => $latest
-      ? ($latest->{image_url} =~ m{^/} ? $site_url . $latest->{image_url} : $latest->{image_url})
+      ? $self->absolute_web_url($latest->{image_url}, "$site_url/")
       : "$site_url/images/hero-collage.webp",
     image_width  => $latest ? $latest->{image_width} : 1200,
     image_height => $latest ? $latest->{image_height} : 630,
@@ -374,9 +386,11 @@ sub _render_archive_page ($self, $archive, $site_url) {
     'all-photos.tt', {
       page => $self->_page_data(
         $fields,
-        prefix     => '../',
-        body_class => 'photo-archive-page',
-        active_nav => 'photos',
+        page_kind    => 'gallery',
+        photo_groups => $archive,
+        prefix       => '../',
+        body_class   => 'photo-archive-page',
+        active_nav   => 'photos',
       ),
       photos      => $archive,
       photo_count => scalar @$archive,
@@ -386,6 +400,7 @@ sub _render_archive_page ($self, $archive, $site_url) {
 
 sub _render_homepage ($self, $photos, $site_url) {
   my $fields = {
+    site_url => $site_url,
     title   => 'Clapham Shopfronts — Every shopfront has a story',
     caption =>
       'Documenting the changing shopfronts of Clapham, London. A growing local history project, one shopfront and one story at a time.',
@@ -400,7 +415,7 @@ sub _render_homepage ($self, $photos, $site_url) {
 
   return $self->render(
     'home.tt', {
-      page   => $self->_page_data($fields),
+      page   => $self->_page_data($fields, page_kind => 'home'),
       photos => $photos,
     }
   );
@@ -434,7 +449,7 @@ sub build ($self, %options) {
   my $home_path = $root->child('docs/index.html');
 
   my $schema = ClaphamShopfronts::Schema->connect_database($root->child('db/claphamshopfront.db'), read_only => 1);
-  my (%outputs, @all_photos);
+  my (%pages, @all_photos);
 
   for my $publication (@{$config->{shopfronts}}) {
     my $code = $publication->{unit_code};
@@ -443,19 +458,32 @@ sub build ($self, %options) {
     my $page_url = $unit->page_url;
     my $output = $root->child('docs', $page_url, 'index.html');
 
-    die "Duplicate published unit: $code\n" if exists $outputs{"$output"};
+    die "Duplicate published unit: $code\n" if exists $pages{"$output"};
 
-    my $photos = $self->_prepare_photographs($rows, $unit->site, $page_url, $base);
+    my $photos = $self->_prepare_photographs($rows, $unit, $page_url, $base, $site_url);
     my $data = $self->_unit_page_data($unit, $publication, $photos, $site_url, $page_url);
 
-    $outputs{"$output"} = $self->_render_unit_page($data);
+    $pages{"$output"} = $data;
     push @all_photos, @$photos;
   }
 
   $schema->storage->disconnect;
 
-  my $unit_pages = scalar keys %outputs;
+  my $unit_pages = scalar keys %pages;
   my $archive = $self->_group_archive_photographs(\@all_photos);
+  my %by_image = map { $_->{filename} => $_ } @$archive;
+  my %outputs;
+
+  # Every page uses the complete set of published subjects for a shared image.
+  for my $file (sort keys %pages) {
+    my $data = $pages{$file};
+    my %seen;
+    my @groups = map { $by_image{$_->{filename}} }
+      grep { !$seen{$_->{filename}}++ } @{$data->{photo_sources}};
+
+    $outputs{$file} = $self->_render_unit_page($data, \@groups);
+  }
+
   my @recent = map { $_->{subjects}[0] } @$archive;
 
   splice @recent, 3 if @recent > 3;

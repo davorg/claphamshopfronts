@@ -4,6 +4,7 @@ requires 'Moose';
 requires 'MooseX::NonMoose';
 requires 'MooseX::MarkAsMethods';
 requires 'MooX::Role::SEOTags', '1.2.1';
+requires 'MooX::Role::JSON_LD', '2.1.0';
 requires 'DBD::SQLite';
 requires 'Template';
 requires 'JSON::MaybeXS';

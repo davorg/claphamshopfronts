@@ -179,11 +179,17 @@ use v5.36;
 use Path::Tiny qw(path);
 use URI::Escape qw(uri_escape_utf8);
 use Image::Magick;
+use Digest::SHA qw(sha256_hex);
+use Encode qw(encode_utf8);
 
 with 'ClaphamShopfronts::Role::Dates';
 
 sub photograph_date ($self) {
   return $self->display_date($self->taken_on);
+}
+
+sub image_anchor ($self) {
+  return 'image-' . sha256_hex(encode_utf8($self->filename));
 }
 
 sub image_assets ($self, $root, $base) {
@@ -211,6 +217,7 @@ sub image_assets ($self, $root, $base) {
   }
 
   return {
+    image_anchor => $self->image_anchor,
     image_url    => $base . uri_escape_utf8($filename, '^A-Za-z0-9\-._~/'),
     small_url    => $base . uri_escape_utf8($thumbnail, '^A-Za-z0-9\-._~/'),
     image_width  => $sizes[0][0],

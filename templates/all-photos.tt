@@ -11,10 +11,10 @@
     </header>
 
 [% IF photo_count -%]
-    <ul class="photo-archive-grid">
+    <ul class="photo-archive-grid" id="photographs">
 [% FOREACH photo IN photos -%]
       <li>
-        <figure class="photo-archive-card">
+        <figure class="photo-archive-card" id="[% photo.image_anchor | html %]">
           <a class="photo-archive-image" href="[% page.prefix | html %][% photo.page_url | html %]" aria-label="View the photograph and story of [% photo.business_name | html %]">
             <img src="[% photo.small_url | html %]" srcset="[% photo.small_url | html %] [% photo.small_width | html %]w, [% photo.image_url | html %] [% photo.image_width | html %]w" sizes="(max-width: 600px) 90vw, (max-width: 900px) 44vw, 360px" width="[% photo.small_width | html %]" height="[% photo.small_height | html %]" alt="[% photo.caption | html %]" loading="lazy">
           </a>

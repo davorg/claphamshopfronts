@@ -323,5 +323,24 @@ sub page_url ($self) {
   return 'shopfronts/' . $self->validate_slug($self->slug) . '/';
 }
 
+sub structured_place ($self, $site_url) {
+  my $site = $self->site;
+  my $url = "$site_url/" . $self->page_url;
+  my $address = {
+    '@type'       => 'PostalAddress',
+    streetAddress => $site->street_address,
+  };
+
+  $address->{postalCode} = $site->postcode if defined $site->postcode && length $site->postcode;
+
+  return {
+    '@type' => 'Place',
+    '@id'   => "$url#premises",
+    url     => $url,
+    name    => $site->street_address,
+    address => $address,
+  };
+}
+
 __PACKAGE__->meta->make_immutable;
 1;

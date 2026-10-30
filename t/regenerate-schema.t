@@ -76,9 +76,11 @@ subtest 'regeneration follows the DDL and preserves custom code and populated da
       my $unit_class = ClaphamShopfronts::Schema->source('Unit')->result_class;
       die "lost slug rules" unless $unit_class->slug_from_address('SW4 7TS', '7 Clapham High Street') eq 'sw4-7ts-7';
       die "lost page URL" unless $unit_class->new({slug => 'sw4-7ts-7'})->page_url eq 'shopfronts/sw4-7ts-7/';
+      die "lost premises metadata" unless $unit_class->can('structured_place');
       my $photo_class = ClaphamShopfronts::Schema->source('Photo')->result_class;
       die "lost photo date" unless $photo_class->new({taken_on => '2026-04-03'})->photograph_date eq '3 April 2026';
       die "lost image assets" unless $photo_class->can('image_assets');
+      die "lost stable image anchor" unless $photo_class->new({filename => 'photos/example.webp'})->image_anchor =~ /^image-[a-f0-9]{64}$/;
       for my $source (ClaphamShopfronts::Schema->sources) {
         my $class = ClaphamShopfronts::Schema->source($source)->result_class;
         die "$class is not Moose" unless $class->meta->isa('Moose::Meta::Class');

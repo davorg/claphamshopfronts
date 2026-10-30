@@ -131,6 +131,8 @@ Canonical and social-image URLs must be absolute HTTP(S) URLs. Archive photograp
 
 Metadata inputs are plain text. The object escapes title content explicitly and uses the role's attribute escaping for tags, so the TT head inserts `page.seo.tags` as generated HTML without another escaping filter. The existing HTML filter continues to escape page content.
 
+The same metadata object composes `MooX::Role::JSON_LD` and supplies one JSON-LD script through the shared head. It describes the project website, gallery, enduring premises and dated photographs, with consistent identifiers for shared images and safe JSON embedding. See [the structured-data mapping](structured-data.md) for types, identifier conventions, evidence precision and deliberate omissions.
+
 Page content lives in `templates/home.tt`, `templates/shopfront.tt` and `templates/all-photos.tt`. The reusable `templates/photograph.tt` and `templates/recent-photographs.tt` render photograph sections. Rebuild after editing any template. Generated HTML in `docs/` is output only: it can be removed and regenerated from the templates, metadata and published images. Styling stays in `docs/styles.css`, and the carousel enhancement stays in `docs/photo-modal.js`.
 
 `ClaphamShopfronts::Site->build` coordinates private methods for loading records, preparing photo and unit-page data, grouping shared archive images, rendering pages and applying the output plan. All assets and rendered pages are validated before the output method writes any files, so a missing image, invalid record or template error leaves existing pages unchanged.

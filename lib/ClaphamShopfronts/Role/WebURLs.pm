@@ -13,6 +13,10 @@ sub validate_web_url ($self, $value) {
   return $value;
 }
 
+sub absolute_web_url ($self, $value, $base) {
+  return $self->validate_web_url(URI->new_abs($value, $base)->as_string);
+}
+
 no Moose::Role;
 
 1;
