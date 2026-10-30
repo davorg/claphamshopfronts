@@ -43,8 +43,12 @@ sub fixture (%options) {
 
   for my $relative (
     qw(
-      docs/index.html
       data/site.json
+      templates/page.tt
+      templates/head.tt
+      templates/nav.tt
+      templates/footer.tt
+      templates/home.tt
       templates/shopfront.tt
       templates/photograph.tt
       templates/recent-photographs.tt

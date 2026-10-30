@@ -93,7 +93,9 @@ subtest 'missing image stops the build before output changes' => sub {
 
   seed_page($root, $schema);
 
-  my $home = $root->child('docs/index.html')->slurp_raw;
+  my $home = 'Existing homepage output';
+
+  $root->child('docs/index.html')->spew_raw($home);
 
   $root->child('docs/images/photos/2026/04/sample-small.webp')->remove;
   try {
@@ -151,7 +153,7 @@ subtest 'recent photos sort by capture date, not insertion order' => sub {
   ClaphamShopfronts::Site->new(root => $root)->build;
 
   my $home = $root->child('docs/index.html')->slurp_utf8;
-  my ($section) = $home =~ /BEGIN GENERATED RECENT PHOTOGRAPHS -->(.*?)<!-- END GENERATED/s;
+  my ($section) = $home =~ /<section class="recent-photographs\b[^>]*>(.*?)<\/section>/s;
 
   ok index($section, 'datetime="2026-04-03"') < index($section, 'datetime="2026-03-01"'), 'newer capture appears first';
 };
@@ -256,7 +258,7 @@ subtest 'new occupant changes the latest record without relabelling earlier evid
   like $page, qr{data-photo-name="Tony Voyage"}, 'new modal trigger identifies the salon';
 
   my $home = $root->child('docs/index.html')->slurp_utf8;
-  my ($recent) = $home =~ /BEGIN GENERATED RECENT PHOTOGRAPHS -->(.*?)<!-- END GENERATED/s;
+  my ($recent) = $home =~ /<section class="recent-photographs\b[^>]*>(.*?)<\/section>/s;
 
   ok index($recent, '<h3>Tony Voyage</h3>') < index($recent, '<h3>Pure Vintage</h3>'),
     'homepage places the new photograph first';

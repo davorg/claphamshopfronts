@@ -1,0 +1,14 @@
+  <header class="site-header wrap">
+    <a class="wordmark" href="[% page.home_url | html %]" aria-label="Clapham Shopfronts home">
+      <svg class="shop-mark" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
+        <path d="M7 20v23h34V20M5 14h38l-3-8H8l-3 8Zm0 0v5a4 4 0 0 0 8 0v-5m0 5a4 4 0 0 0 8 0v-5m0 5a4 4 0 0 0 8 0v-5m0 5a4 4 0 0 0 8 0v-5m0 5a3 3 0 0 0 6 0v-5M12 27h12v10H12V27Zm18 16V27h7v16M4 43h40"/>
+      </svg>
+      <span>Clapham<span>Shopfronts</span></span>
+    </a>
+    <nav aria-label="Main navigation">
+      <a href="[% page.prefix | html %]photos/"[% IF page.active_nav == 'photos' %] aria-current="page"[% END %]>All photos</a>
+      <a href="[% page.prefix | html %]#the-project">The project</a>
+      <a href="[% page.prefix | html %]#contribute">Get involved</a>
+      <a class="instagram-nav" href="https://instagram.com/claphamshopfronts">Follow along <span aria-hidden="true">↗</span></a>
+    </nav>
+  </header>

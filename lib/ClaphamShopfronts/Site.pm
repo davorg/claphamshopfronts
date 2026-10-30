@@ -12,8 +12,6 @@ use ClaphamShopfronts::Util qw(read_json display_date web_url image_base html im
 
 with 'ClaphamShopfronts::Role::ProjectRoot';
 
-my $START = '<!-- BEGIN GENERATED RECENT PHOTOGRAPHS -->';
-my $END = '<!-- END GENERATED RECENT PHOTOGRAPHS -->';
 my %STATUS = (
   occupied            => 'Occupied',
   vacant              => 'Vacant',
@@ -50,51 +48,25 @@ sub render ($self, $template, $variables) {
   return $output;
 }
 
-sub fragment ($document, $pattern) {
-  my @matches = $document =~ /($pattern)/sg;
+sub _page_data ($self, $fields, %options) {
+  my $prefix = $options{prefix} // '';
 
-  die "Expected one shared homepage head, header, or footer\n" unless @matches == 1;
-
-  return $matches[0];
-}
-
-sub page_header ($home, $prefix, $current = '') {
-  my $header = fragment($home, qr{<header class="site-header wrap">.*?</header>}s);
-
-  $header =~ s{href="\./"}{'href="' . $prefix . '"'}ge;
-  $header =~ s{href="#([^"]+)"}{'href="' . $prefix . '#' . $1 . '"'}ge;
-  $header =~
-    s{href="photos/"}{'href="' . $prefix . 'photos/"' . ($current eq 'photos' ? ' aria-current="page"' : '')}ge;
-
-  return $header;
-}
-
-sub page_head ($home, $fields, $prefix = '../../') {
-  my $head = fragment($home, qr{<head>.*?</head>}s);
-  my $count = $head =~ s{<title>.*?</title>}{'<title>' . html($fields->{title}) . '</title>'}se;
-
-  die "Expected one homepage title\n" unless $count == 1;
-
-  my %metadata = (
-    description       => $fields->{caption},
-    'og:title'        => $fields->{title},
-    'og:description'  => $fields->{caption},
-    'og:image'        => $fields->{social_image},
-    'og:image:width'  => $fields->{image_width},
-    'og:image:height' => $fields->{image_height},
-    'og:image:alt'    => $fields->{caption}
-  );
-
-  for my $key (keys %metadata) {
-    $count = $head =~ s{(<meta (?:name|property)="\Q$key\E" content=")[^"]*(">)}{$1 . html($metadata{$key}) . $2}ge;
-
-    die "Expected one homepage meta tag for $key\n" unless $count == 1;
-  }
-
-  $head =~ s{href="styles.css"}{'href="' . $prefix . 'styles.css"'}ge;
-  $head =~ s{</head>}{'  <link rel="canonical" href="' . html($fields->{canonical}) . qq{">\n</head>}}e;
-
-  return $head;
+  return {
+    title          => $fields->{title},
+    description    => $fields->{caption},
+    og_type        => 'website',
+    og_description => $fields->{og_description} // $fields->{caption},
+    social_image   => $fields->{social_image},
+    image_width    => $fields->{image_width},
+    image_height   => $fields->{image_height},
+    image_alt      => $fields->{image_alt} // $fields->{caption},
+    canonical      => $fields->{canonical},
+    prefix         => $prefix,
+    home_url       => $prefix || './',
+    body_class     => $options{body_class} // '',
+    active_nav     => $options{active_nav} // '',
+    scripts        => $options{scripts} // [],
+  };
 }
 
 sub photo_assets ($self, $photo, $base) {
@@ -364,13 +336,16 @@ sub _unit_page_data ($self, $unit, $publication, $photos, $site_url, $page_url) 
   };
 }
 
-sub _render_unit_page ($self, $data, $layout) {
+sub _render_unit_page ($self, $data) {
   return $self->render(
     'shopfront.tt', {
       %$data,
-      head   => page_head($layout->{home}, $data),
-      header => $layout->{header},
-      footer => $layout->{footer},
+      page => $self->_page_data(
+        $data,
+        prefix     => '../../',
+        body_class => 'shopfront-page',
+        scripts    => ['photo-modal.js'],
+      ),
     }
   );
 }
@@ -393,8 +368,7 @@ sub _group_archive_photographs ($self, $photos) {
   return \@archive;
 }
 
-sub _render_archive_page ($self, $archive, $layout) {
-  my $site_url = $layout->{site_url};
+sub _render_archive_page ($self, $archive, $site_url) {
   my $latest = $archive->[0];
   my $fields = {
     title   => 'All photos — Clapham Shopfronts',
@@ -410,30 +384,38 @@ sub _render_archive_page ($self, $archive, $layout) {
 
   return $self->render(
     'all-photos.tt', {
-      head        => page_head($layout->{home}, $fields, '../'),
-      header      => page_header($layout->{home}, '../', 'photos'),
-      footer      => $layout->{footer},
+      page => $self->_page_data(
+        $fields,
+        prefix     => '../',
+        body_class => 'photo-archive-page',
+        active_nav => 'photos',
+      ),
       photos      => $archive,
       photo_count => scalar @$archive,
     }
   );
 }
 
-sub _render_homepage ($self, $photos, $layout) {
-  my $home = $layout->{home};
-  my $recent = @$photos
-    ? $self->render(
-      'recent-photographs.tt', {
-        photos => $photos
-      }
-    )
-    : '';
+sub _render_homepage ($self, $photos, $site_url) {
+  my $fields = {
+    title   => 'Clapham Shopfronts — Every shopfront has a story',
+    caption =>
+      'Documenting the changing shopfronts of Clapham, London. A growing local history project, one shopfront and one story at a time.',
+    og_description => 'A small record of a changing neighbourhood. Documenting the shopfronts of Clapham, London.',
+    image_alt =>
+      'A collage of eight watercolours of Clapham shopfronts and the Clapham High Street sign, taped to cream paper.',
+    canonical    => "$site_url/",
+    social_image => "$site_url/images/hero-collage.webp",
+    image_width  => 1200,
+    image_height => 630,
+  };
 
-  my $count = $home =~ s{\Q$START\E.*?\Q$END\E}{$START . "\n" . $recent . "\n    " . $END}se;
-
-  die "Expected one generated recent-photographs section in the homepage\n" unless $count == 1;
-
-  return $home;
+  return $self->render(
+    'home.tt', {
+      page   => $self->_page_data($fields),
+      photos => $photos,
+    }
+  );
 }
 
 sub _apply_outputs ($self, $outputs, $check) {
@@ -462,13 +444,6 @@ sub build ($self, %options) {
 
   my $base = image_base($options{image_base} // $config->{image_base});
   my $home_path = $root->child('docs/index.html');
-  my $home = $home_path->slurp_utf8;
-  my $layout = {
-    home     => $home,
-    site_url => $site_url,
-    header   => page_header($home, '../../'),
-    footer   => fragment($home, qr{<footer class="site-footer wrap">.*?</footer>}s),
-  };
 
   my $schema = ClaphamShopfronts::Schema->connect_database($root->child('db/claphamshopfront.db'), read_only => 1);
   my (%outputs, @all_photos);
@@ -485,7 +460,7 @@ sub build ($self, %options) {
     my $photos = $self->_prepare_photographs($rows, $unit->site, $page_url, $base);
     my $data = $self->_unit_page_data($unit, $publication, $photos, $site_url, $page_url);
 
-    $outputs{"$output"} = $self->_render_unit_page($data, $layout);
+    $outputs{"$output"} = $self->_render_unit_page($data);
     push @all_photos, @$photos;
   }
 
@@ -497,8 +472,8 @@ sub build ($self, %options) {
 
   splice @recent, 3 if @recent > 3;
 
-  $outputs{"" . $root->child('docs/photos/index.html')} = $self->_render_archive_page($archive, $layout);
-  $outputs{"$home_path"} = $self->_render_homepage(\@recent, $layout);
+  $outputs{"" . $root->child('docs/photos/index.html')} = $self->_render_archive_page($archive, $site_url);
+  $outputs{"$home_path"} = $self->_render_homepage(\@recent, $site_url);
 
   # Every page and asset has been validated before any output is written.
   my $changed = $self->_apply_outputs(\%outputs, $options{check});
