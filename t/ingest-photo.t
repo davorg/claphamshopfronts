@@ -3,9 +3,8 @@ use feature 'try';
 no warnings 'experimental::try';
 use Test::More;
 use lib 'lib', 't/lib';
-use ClaphamTest qw(fixture setup_original snapshot counts save_json);
+use ClaphamTest qw(fixture setup_original snapshot counts save_json file_sha image_size);
 use ClaphamShopfronts::Ingest;
-use ClaphamShopfronts::Util qw(file_sha image_size);
 
 sub followup ($root, %options) {
   my ($manifest, $data, $original) = setup_original(

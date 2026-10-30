@@ -3,8 +3,7 @@ use feature 'try';
 no warnings 'experimental::try';
 use Test::More;
 use lib 'lib', 't/lib';
-use ClaphamTest qw(fixture seed_page);
-use ClaphamShopfronts::Util qw(file_sha);
+use ClaphamTest qw(fixture seed_page file_sha);
 use Path::Tiny qw(path);
 use IPC::Open3 qw(open3);
 use Symbol qw(gensym);
@@ -42,6 +41,7 @@ subtest 'regeneration follows the DDL and preserves custom code and populated da
   $schema->storage->disconnect;
 
   for my $relative ('bin/regenerate-schema', 'db/claphamshopfronts.ddl',
+                    'lib/ClaphamShopfronts/Role/Dates.pm',
                     'lib/ClaphamShopfronts/Schema.pm',
                     map {"" . $_} path('lib/ClaphamShopfronts/Schema/Result')->children(qr/\.pm$/)) {
     my $destination = $root->child($relative);
@@ -73,6 +73,12 @@ subtest 'regeneration follows the DDL and preserves custom code and populated da
       die "lost custom code" unless ClaphamShopfronts::Schema->regeneration_probe eq 'custom code preserved';
       die "schema is not Moose" unless ClaphamShopfronts::Schema->meta->isa('Moose::Meta::Class');
       die "schema is mutable" unless ClaphamShopfronts::Schema->meta->is_immutable;
+      my $unit_class = ClaphamShopfronts::Schema->source('Unit')->result_class;
+      die "lost slug rules" unless $unit_class->slug_from_address('SW4 7TS', '7 Clapham High Street') eq 'sw4-7ts-7';
+      die "lost page URL" unless $unit_class->new({slug => 'sw4-7ts-7'})->page_url eq 'shopfronts/sw4-7ts-7/';
+      my $photo_class = ClaphamShopfronts::Schema->source('Photo')->result_class;
+      die "lost photo date" unless $photo_class->new({taken_on => '2026-04-03'})->photograph_date eq '3 April 2026';
+      die "lost image assets" unless $photo_class->can('image_assets');
       for my $source (ClaphamShopfronts::Schema->sources) {
         my $class = ClaphamShopfronts::Schema->source($source)->result_class;
         die "$class is not Moose" unless $class->meta->isa('Moose::Meta::Class');

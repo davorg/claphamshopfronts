@@ -4,9 +4,8 @@ no warnings 'experimental::try';
 use utf8;
 use Test::More;
 use lib 'lib', 't/lib';
-use ClaphamTest qw(fixture seed_page snapshot);
+use ClaphamTest qw(fixture seed_page snapshot file_sha read_json);
 use ClaphamShopfronts::Site;
-use ClaphamShopfronts::Util qw(file_sha);
 
 subtest 'DBIC data, TT escaping, history and repeatable output' => sub {
   my ($root, $schema) = fixture();
@@ -271,7 +270,7 @@ subtest 'published history is distinguished from unconfirmed reports and photo o
 
   seed_page($root, $schema);
 
-  my $config = ClaphamShopfronts::Util::read_json($root->child('data/site.json'));
+  my $config = read_json($root->child('data/site.json'));
 
   $config->{shopfronts}[0]{sourced_events} = [{
     date         => '2020',
@@ -344,7 +343,7 @@ subtest 'shared image appears on both unit pages but once among recent photograp
     }
   );
 
-  my $config = ClaphamShopfronts::Util::read_json($root->child('data/site.json'));
+  my $config = read_json($root->child('data/site.json'));
 
   push @{$config->{shopfronts}}, {unit_code => 'CHS0002-U01'};
   ClaphamTest::save_json($root->child('data/site.json'), $config);
@@ -423,7 +422,8 @@ subtest 'complete archive is chronological, escaped and linked from every page' 
   like $archive, qr{href="../styles.css"}, 'archive stylesheet resolves from its depth';
   like $archive, qr{href="../#the-project"}, 'archive navigation links back to homepage sections';
   like $archive, qr{href="../photos/" aria-current="page">All photos}, 'active archive link indicated';
-  like $archive, qr{rel="canonical" href="https://claphamshopfronts.com/photos/"}, 'archive canonical URL';
+  like $archive, qr{<link\b(?=[^>]*\brel="canonical")(?=[^>]*\bhref="https://claphamshopfronts.com/photos/")[^>]*>},
+    'archive canonical URL';
 
   my $home = $root->child('docs/index.html')->slurp_utf8;
 
@@ -449,7 +449,7 @@ subtest 'complete archive is chronological, escaped and linked from every page' 
 
 subtest 'empty archive renders without needing a published unit' => sub {
   my ($root) = fixture();
-  my $config = ClaphamShopfronts::Util::read_json($root->child('data/site.json'));
+  my $config = read_json($root->child('data/site.json'));
 
   $config->{shopfronts} = [];
   ClaphamTest::save_json($root->child('data/site.json'), $config);

@@ -3,6 +3,7 @@ requires 'DBIx::Class';
 requires 'Moose';
 requires 'MooseX::NonMoose';
 requires 'MooseX::MarkAsMethods';
+requires 'MooX::Role::SEOTags', '1.2.1';
 requires 'DBD::SQLite';
 requires 'Template';
 requires 'JSON::MaybeXS';
@@ -14,6 +15,7 @@ requires 'HTML::Entities';
 
 on 'test' => sub {
   requires 'Test::More';
+  requires 'HTML::Parser';
 };
 
 on 'develop' => sub {

@@ -175,6 +175,50 @@ __PACKAGE__->belongs_to(
 # DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:sjudiHEgM8bK2WxcaN8VGw
 
 
-# You can replace this text with custom code or comments, and it will be preserved on regeneration
+use v5.36;
+use Path::Tiny qw(path);
+use URI::Escape qw(uri_escape_utf8);
+use Image::Magick;
+
+with 'ClaphamShopfronts::Role::Dates';
+
+sub photograph_date ($self) {
+  return $self->display_date($self->taken_on);
+}
+
+sub image_assets ($self, $root, $base) {
+  my $filename = $self->filename;
+
+  die "Expected an image-root-relative WebP filename: $filename\n"
+    if $filename =~ m{^/|(?:^|/)\.\.(?:/|$)|\\} || $filename !~ /\.webp$/;
+
+  (my $thumbnail = $filename) =~ s/\.webp$/-small.webp/;
+  my $images = path($root)->child('docs/images')->realpath;
+  my @sizes;
+
+  for my $relative ($filename, $thumbnail) {
+    my $file = $images->child($relative);
+
+    die "Published image not found: $relative\n" unless $file->is_file;
+    die "Image path leaves published directory\n" unless index("" . $file->realpath, "$images/") == 0;
+
+    my $image = Image::Magick->new;
+    my $error = $image->Read("$file");
+
+    die "Cannot read image $file: $error\n" if "$error";
+
+    push @sizes, [$image->Get('width', 'height')];
+  }
+
+  return {
+    image_url    => $base . uri_escape_utf8($filename, '^A-Za-z0-9\-._~/'),
+    small_url    => $base . uri_escape_utf8($thumbnail, '^A-Za-z0-9\-._~/'),
+    image_width  => $sizes[0][0],
+    image_height => $sizes[0][1],
+    small_width  => $sizes[1][0],
+    small_height => $sizes[1][1],
+  };
+}
+
 __PACKAGE__->meta->make_immutable;
 1;

@@ -289,6 +289,39 @@ __PACKAGE__->many_to_many("tags", "unit_tags", "tag");
 # DO NOT MODIFY THIS OR ANYTHING ABOVE! md5sum:Ls1+I6tjbp2jxAu75R7EMw
 
 
-# You can replace this text with custom code or comments, and it will be preserved on regeneration
+use v5.36;
+
+sub validate_slug ($class, $slug) {
+  die "Unit slug must contain lowercase letters, digits and single hyphens\n"
+    unless defined $slug && !ref $slug && $slug =~ /\A[a-z0-9]+(?:-[a-z0-9]+)*\z/;
+
+  return $slug;
+}
+
+sub slug_from_address ($class, $postcode, $address, $explicit = undef) {
+  return $class->validate_slug($explicit) if defined $explicit;
+
+  my $compact = uc($postcode // '');
+  $compact =~ s/\s+//g;
+
+  die "Cannot derive a slug without a postcode; supply unit.slug\n"
+    unless $compact =~ /\A([A-Z0-9]{2,4})([0-9][A-Z]{2})\z/;
+
+  my ($outward, $inward) = ($1, $2);
+
+  die "Cannot derive a street number from the address; supply unit.slug\n"
+    unless ($address // '') =~ /^\s*(\d+[A-Za-z]?(?:\s*[-–—]\s*\d+[A-Za-z]?)?)(?=\s|,|$)/;
+
+  my $number = $1;
+  $number =~ s/\s+//g;
+  $number =~ tr/–—/--/;
+
+  return $class->validate_slug(lc "$outward-$inward-$number");
+}
+
+sub page_url ($self) {
+  return 'shopfronts/' . $self->validate_slug($self->slug) . '/';
+}
+
 __PACKAGE__->meta->make_immutable;
 1;

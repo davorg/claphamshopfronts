@@ -3,9 +3,8 @@ use feature 'try';
 no warnings 'experimental::try';
 use Test::More;
 use lib 'lib', 't/lib';
-use ClaphamTest qw(fixture seed_page snapshot);
+use ClaphamTest qw(fixture seed_page snapshot file_sha);
 use ClaphamShopfronts::Site;
-use ClaphamShopfronts::Util qw(file_sha);
 
 my @pages = (
   {
@@ -54,7 +53,8 @@ subtest 'all page types share one wrapper with links at the correct depth' => su
       is scalar(() = $html =~ /<header class="site-header wrap">/g), 1, 'one shared navigation header';
       is scalar(() = $html =~ /<footer class="site-footer wrap">/g), 1, 'one shared footer';
       is scalar(() = $html =~ /rel="canonical"/g), 1, 'one canonical link';
-      like $html, qr{rel="canonical" href="\Q$page->{canonical}\E"}, 'page-specific canonical URL';
+      like $html, qr{<link\b(?=[^>]*\brel="canonical")(?=[^>]*\bhref="\Q$page->{canonical}\E")[^>]*>},
+        'page-specific canonical URL';
       like $html, qr{href="\Q$page->{home_url}\E" aria-label="Clapham Shopfronts home"}, 'wordmark links home';
       like $html, qr{href="\Q$prefix\Ephotos/"}, 'gallery link resolves';
       like $html, qr{href="\Q$prefix\E#the-project"}, 'homepage project anchor resolves';

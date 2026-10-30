@@ -7,12 +7,28 @@ use File::Temp qw(tempdir);
 use DBI;
 use Image::Magick;
 use Image::ExifTool;
-use JSON::MaybeXS qw(encode_json);
+use JSON::MaybeXS qw(encode_json decode_json);
 use ClaphamShopfronts::Schema;
-use ClaphamShopfronts::Util qw(read_json file_sha);
 
-our @EXPORT_OK = qw(fixture seed_page setup_original snapshot counts save_json);
+our @EXPORT_OK = qw(fixture seed_page setup_original snapshot counts save_json read_json file_sha image_size);
 my $PROJECT = path(__FILE__)->absolute->parent(3);
+
+sub read_json ($filename) {
+  return decode_json(path($filename)->slurp_raw);
+}
+
+sub file_sha ($filename) {
+  return path($filename)->digest({chunk_size => 65536}, 'SHA-256');
+}
+
+sub image_size ($filename) {
+  my $image = Image::Magick->new;
+  my $error = $image->Read("$filename");
+
+  die "Cannot read test image $filename: $error\n" if "$error";
+
+  return [$image->Get('width', 'height')];
+}
 
 sub save_json ($filename, $data) {
   path($filename)->spew_raw(encode_json($data));

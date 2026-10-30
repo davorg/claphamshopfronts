@@ -97,6 +97,8 @@ The command uses DBIx::Class::Schema::Loader, already listed among the developme
 
 Custom code below Loader's `DO NOT MODIFY THIS OR ANYTHING ABOVE` marker is preserved, including `connect_database`. Put future custom methods below that marker and before `make_immutable`. Review the generated diff after changing the DDL. Repeating regeneration with unchanged DDL leaves the files unchanged.
 
+Domain behaviour lives on the result classes: `Unit->slug_from_address` and `validate_slug` define address slugs, while a unit's `page_url` uses its stored slug. A photo's `photograph_date` formats its capture date, and `image_assets` validates its published files and returns image URLs and dimensions. These methods sit below the regeneration markers and are covered by regeneration tests.
+
 Regeneration does not read or modify the populated `db/claphamshopfront.db`, and it does not apply migrations. Keep the migration code in step with the DDL and run migrations separately when upgrading an existing database. The command resolves paths from its own location, so it also works when called from another directory.
 
 ## Unit URLs
@@ -123,9 +125,17 @@ The complete [All photos gallery](docs/photos/index.html) is generated at `/phot
 
 The homepage, unit and gallery templates each use `WRAPPER page.tt`. The shared wrapper supplies the HTML document, skip link, head, navigation, footer and page-specific scripts. Its partials are `templates/head.tt`, `templates/nav.tt` and `templates/footer.tt`; edit these to update shared fonts, analytics, navigation or project credit across the site. Explicit page data supplies escaped metadata, canonical URLs, relative link prefixes, body classes and active navigation.
 
+`ClaphamShopfronts::PageMetadata` is an immutable Moose object composing [MooX::Role::SEOTags](https://metacpan.org/pod/MooX::Role::SEOTags), declared as a runtime dependency at version 1.2.1 or later. The shared head renders its `tags` method once for the title, search description, canonical link, OpenGraph and Twitter metadata. The object adds image width, height and Twitter alt tags, while the role supplies OpenGraph alt text. Fonts, analytics and stylesheet links remain in the head partial.
+
+Canonical and social-image URLs must be absolute HTTP(S) URLs. Archive photographs use the configured image base; the decorative homepage image stays on the configured site host. Unit metadata describes the latest photograph and its identified business, independently of a later occupancy. The homepage retains its distinct search description and social summary. Image dimensions and alt text are retained; without an image, image-specific tags are omitted and the Twitter card becomes `summary`. Missing optional dimensions or alt text are omitted too.
+
+Metadata inputs are plain text. The object escapes title content explicitly and uses the role's attribute escaping for tags, so the TT head inserts `page.seo.tags` as generated HTML without another escaping filter. The existing HTML filter continues to escape page content.
+
 Page content lives in `templates/home.tt`, `templates/shopfront.tt` and `templates/all-photos.tt`. The reusable `templates/photograph.tt` and `templates/recent-photographs.tt` render photograph sections. Rebuild after editing any template. Generated HTML in `docs/` is output only: it can be removed and regenerated from the templates, metadata and published images. Styling stays in `docs/styles.css`, and the carousel enhancement stays in `docs/photo-modal.js`.
 
 `ClaphamShopfronts::Site->build` coordinates private methods for loading records, preparing photo and unit-page data, grouping shared archive images, rendering pages and applying the output plan. All assets and rendered pages are validated before the output method writes any files, so a missing image, invalid record or template error leaves existing pages unchanged.
+
+Shared date parsing and formatting come from `ClaphamShopfronts::Role::Dates`; `Role::WebURLs` provides the HTTP(S) URL validation used by site generation and page metadata. Services call JSON decoding and filesystem methods directly, including `Path::Tiny`'s streaming SHA-256 digest for original photographs.
 
 On a shopfront page, clicking any photograph or its “View larger” link opens that photograph in a native dialog carousel. Previous/next buttons and the left/right arrow keys browse all photographs of that unit, newest first, wrapping at either end. Each slide shows its business name, date, photographer credit where available, and position in the set. Navigation buttons are hidden for a single photograph. Close it with ×, Escape, or the backdrop; keyboard focus returns to the original link, even after browsing. Without JavaScript, these links still open the image directly. The enhancement is in `docs/photo-modal.js`.
 
@@ -157,7 +167,7 @@ This runs the Perl test suite, checks generated pages with `bin/build-site.pl --
 
 The schema comparison checks generated code, including missing and obsolete classes. It ignores Loader's version, timestamp and checksum comments and custom code below its marker. If the DDL changes, run `bin/regenerate-schema`, review the diff and any obsolete classes, then rerun `bin/check`. Rebuild stale pages with `perl bin/build-site.pl`.
 
-Templates use the same HTML escaping helper as page metadata, including apostrophe escaping, so generated output remains consistent across Template Toolkit versions.
+Templates use an explicit `HTML::Entities` filter, including apostrophe escaping, so output remains consistent across Template Toolkit versions. The metadata object uses HTML::Tiny's escaping for titles and attributes. Tests check that both preserve text without turning it into markup.
 
 For verbose test output alone, use `prove -Ilib -It/lib -lv t`.
 

@@ -3,9 +3,8 @@ use feature 'try';
 no warnings 'experimental::try';
 use Test::More;
 use lib 'lib', 't/lib';
-use ClaphamTest qw(fixture seed_page snapshot save_json);
+use ClaphamTest qw(fixture seed_page snapshot save_json read_json);
 use ClaphamShopfronts::Migrate;
-use ClaphamShopfronts::Util qw(read_json);
 
 subtest 'legacy data is preserved and identified only from matching reviewed metadata' => sub {
   my ($root, $schema) = fixture(legacy => 1);

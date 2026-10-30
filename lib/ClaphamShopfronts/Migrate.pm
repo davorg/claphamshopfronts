@@ -2,20 +2,24 @@ package ClaphamShopfronts::Migrate;
 
 use v5.36;
 use feature 'try';
+use Moose;
 no warnings 'experimental::try';
 use Path::Tiny qw(path);
+use JSON::MaybeXS qw(decode_json);
 use ClaphamShopfronts::Schema;
-use ClaphamShopfronts::Util qw(read_json display_date unit_slug validate_slug);
+use ClaphamShopfronts::Schema::Result::Unit;
 
-sub identify_observations ($schema, $root) {
+with 'ClaphamShopfronts::Role::Dates';
+
+sub identify_observations ($class, $schema, $root) {
   my $count = 0;
 
   # Reviewed, matching import metadata identifies an existing photo's business.
   for my $file (sort $root->child('data/photos')->children(qr/\.json$/)) {
-    my $data = read_json($file);
+    my $data = decode_json($file->slurp_raw);
 
     next unless $data->{business};
-    display_date($data->{taken_on});
+    $class->parse_date($data->{taken_on});
 
     die "Invalid original checksum in reviewed metadata: $file\n"
       unless ($data->{original_sha256} // '') =~ /^[a-f0-9]{64}$/;
@@ -54,15 +58,15 @@ sub identify_observations ($schema, $root) {
   return $count;
 }
 
-sub add_unit_slugs ($dbh, $root) {
+sub add_unit_slugs ($class, $dbh, $root) {
   my %explicit;
 
   for my $file ($root->child('data/photos')->children(qr/\.json$/)) {
-    my $unit = read_json($file)->{unit};
+    my $unit = decode_json($file->slurp_raw)->{unit};
 
     next unless defined $unit->{slug};
 
-    my $slug = validate_slug($unit->{slug});
+    my $slug = ClaphamShopfronts::Schema::Result::Unit->validate_slug($unit->{slug});
 
     die "Conflicting explicit slugs for $unit->{unit_code}\n"
       if exists $explicit{$unit->{unit_code}} && $explicit{$unit->{unit_code}} ne $slug;
@@ -80,7 +84,9 @@ sub add_unit_slugs ($dbh, $root) {
   my %used;
 
   for my $row (@$rows) {
-    $row->{slug} = unit_slug($row->{slug_postcode}, $row->{slug_address}, $explicit{$row->{unit_code}});
+    $row->{slug} = ClaphamShopfronts::Schema::Result::Unit->slug_from_address(
+      $row->{slug_postcode}, $row->{slug_address}, $explicit{$row->{unit_code}}
+    );
 
     die "Slug collision for $row->{slug}; supply distinct unit.slug values in reviewed metadata\n"
       if $used{$row->{slug}}++;
@@ -163,8 +169,8 @@ sub migrate ($class, $root) {
         $dbh->do('CREATE INDEX idx_observations_business_id ON observations(business_id)');
       }
 
-      my $assigned = add_unit_slugs($dbh, $root);
-      my $identified = $version == 0 ? identify_observations($schema, $root) : 0;
+      my $assigned = $class->add_unit_slugs($dbh, $root);
+      my $identified = $version == 0 ? $class->identify_observations($schema, $root) : 0;
 
       die "Migration would leave foreign-key violations\n" if @{$dbh->selectall_arrayref('PRAGMA foreign_key_check')};
 
@@ -188,5 +194,8 @@ sub migrate ($class, $root) {
 
   return $result;
 }
+
+no Moose;
+__PACKAGE__->meta->make_immutable;
 
 1;

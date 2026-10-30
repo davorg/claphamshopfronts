@@ -5,21 +5,23 @@ use utf8;
 use Test::More;
 use lib 'lib', 't/lib';
 use ClaphamTest qw(fixture seed_page setup_original save_json snapshot);
-use ClaphamShopfronts::Util qw(unit_slug validate_slug);
+use ClaphamShopfronts::Schema::Result::Unit;
 use ClaphamShopfronts::Ingest;
 use ClaphamShopfronts::Site;
 
+my $unit_class = 'ClaphamShopfronts::Schema::Result::Unit';
+
 subtest 'address-based slug conventions' => sub {
-  is unit_slug('SW4 7TS', '7 Clapham High Street, London'), 'sw4-7ts-7', 'postcode and number';
-  is unit_slug(' sw47ts ', '7A Clapham High Street'), 'sw4-7ts-7a', 'letter suffix and postcode normalisation';
-  is unit_slug('SW4 7TS', '7–9 Clapham High Street'), 'sw4-7ts-7-9', 'address range';
-  is unit_slug('SW4 7TS', '7 - 9A Clapham High Street'), 'sw4-7ts-7-9a', 'range with spaces and letter suffix';
-  is unit_slug(undef, 'Named premises', 'sw4-7ts-7-u2'), 'sw4-7ts-7-u2',
+  is $unit_class->slug_from_address('SW4 7TS', '7 Clapham High Street, London'), 'sw4-7ts-7', 'postcode and number';
+  is $unit_class->slug_from_address(' sw47ts ', '7A Clapham High Street'), 'sw4-7ts-7a', 'letter suffix and postcode normalisation';
+  is $unit_class->slug_from_address('SW4 7TS', '7–9 Clapham High Street'), 'sw4-7ts-7-9', 'address range';
+  is $unit_class->slug_from_address('SW4 7TS', '7 - 9A Clapham High Street'), 'sw4-7ts-7-9a', 'range with spaces and letter suffix';
+  is $unit_class->slug_from_address(undef, 'Named premises', 'sw4-7ts-7-u2'), 'sw4-7ts-7-u2',
     'explicit slug supports shared or unusual addresses';
 
   for my $slug ('SW4-7TS-7', '../elsewhere', 'sw4--7ts-7', 'sw4 7ts-7', '') {
     try {
-      validate_slug($slug);
+      $unit_class->validate_slug($slug);
       fail 'invalid path rejected';
     } catch ($error) {
       like $error, qr/Unit slug/, 'invalid path rejected';
@@ -27,14 +29,14 @@ subtest 'address-based slug conventions' => sub {
   }
 
   try {
-    unit_slug(undef, '7 Clapham High Street');
+    $unit_class->slug_from_address(undef, '7 Clapham High Street');
     fail 'missing postcode needs an explicit choice';
   } catch ($error) {
     like $error, qr/supply unit.slug/, 'missing postcode needs an explicit choice';
   }
 
   try {
-    unit_slug('SW4 7TS', 'Named premises');
+    $unit_class->slug_from_address('SW4 7TS', 'Named premises');
     fail 'missing number needs an explicit choice';
   } catch ($error) {
     like $error, qr/supply unit.slug/, 'missing number needs an explicit choice';

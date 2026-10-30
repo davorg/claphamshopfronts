@@ -8,10 +8,11 @@ use Path::Tiny qw(path);
 use File::Temp qw(tempdir);
 use Image::ExifTool qw(ImageInfo);
 use Image::Magick;
+use JSON::MaybeXS qw(decode_json);
 use ClaphamShopfronts::Schema;
-use ClaphamShopfronts::Util qw(read_json file_sha display_date image_size unit_slug validate_slug);
+use ClaphamShopfronts::Schema::Result::Unit;
 
-with 'ClaphamShopfronts::Role::ProjectRoot';
+with 'ClaphamShopfronts::Role::ProjectRoot', 'ClaphamShopfronts::Role::Dates';
 
 sub finish_original ($self, $source, $destination) {
   return if "$source" eq "$destination";
@@ -57,7 +58,12 @@ sub write_image ($self, $source, $destination, $limit) {
   $error = $image->Write(filename => "webp:$destination", quality => 85);
   die "Cannot write website image: $error\n" if "$error";
 
-  image_size($destination);
+  my $written = Image::Magick->new;
+  $error = $written->Read("$destination");
+
+  die "Cannot read image $destination: $error\n" if "$error";
+
+  return [$written->Get('width', 'height')];
 }
 
 # Dates bound the evidence we have, rather than inventing a handover date.
@@ -70,7 +76,7 @@ sub observation_plan ($self, $schema, $data, $taken_on) {
   });
 
   unless ($unit) {
-    my $slug = unit_slug(
+    my $slug = ClaphamShopfronts::Schema::Result::Unit->slug_from_address(
       $data->{site}{postcode},
       $data->{site}{street_address},
       $data->{unit}{slug},
@@ -83,7 +89,7 @@ sub observation_plan ($self, $schema, $data, $taken_on) {
   }
 
   die "A stored unit slug cannot be changed by importing a photo\n"
-    if defined $data->{unit}{slug} && validate_slug($data->{unit}{slug}) ne $unit->slug;
+    if defined $data->{unit}{slug} && $unit->validate_slug($data->{unit}{slug}) ne $unit->slug;
 
   my $site = $unit->site;
 
@@ -133,7 +139,7 @@ sub observation_plan ($self, $schema, $data, $taken_on) {
 
 sub ingest ($self, $manifest_path, %options) {
   my $root = $self->root;
-  my $data = read_json($manifest_path);
+  my $data = decode_json(path($manifest_path)->slurp_raw);
   my $name = $data->{original};
 
   die "original must be a filename, without directories\n"
@@ -148,7 +154,7 @@ sub ingest ($self, $manifest_path, %options) {
 
   die "Original not found: $name\n" unless $source->is_file;
 
-  my $digest = file_sha($source);
+  my $digest = $source->digest({chunk_size => 65536}, 'SHA-256');
 
   die "Original SHA-256 does not match the manifest\n" unless $digest eq ($data->{original_sha256} // '');
 
@@ -160,12 +166,12 @@ sub ingest ($self, $manifest_path, %options) {
   my ($year, $month, $day) = ($1, $2, $3);
   my $taken_on = "$year-$month-$day";
 
-  display_date($taken_on);
+  $self->parse_date($taken_on);
 
   die "Manifest date does not match EXIF DateTimeOriginal\n" unless $taken_on eq $data->{taken_on};
 
   if (defined $data->{occupancy_valid_to}) {
-    display_date($data->{occupancy_valid_to});
+    $self->parse_date($data->{occupancy_valid_to});
     die "Occupancy end date precedes the photograph\n" if $data->{occupancy_valid_to} lt $taken_on;
   }
 

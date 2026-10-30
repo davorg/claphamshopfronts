@@ -6,6 +6,8 @@ use lib 'lib';
 use Path::Tiny qw(path);
 use ClaphamShopfronts::Ingest;
 use ClaphamShopfronts::Site;
+use ClaphamShopfronts::Migrate;
+use ClaphamShopfronts::Schema::Result::Photo;
 
 for my $class (qw(ClaphamShopfronts::Ingest ClaphamShopfronts::Site)) {
   subtest "$class has a Moose constructor" => sub {
@@ -47,5 +49,30 @@ for my $class (qw(ClaphamShopfronts::Ingest ClaphamShopfronts::Site)) {
     }
   };
 }
+
+subtest 'services and photo records share strict ISO date handling' => sub {
+  my @consumers = (
+    ClaphamShopfronts::Ingest->new(root => '.'),
+    ClaphamShopfronts::Site->new(root => '.'),
+    ClaphamShopfronts::Migrate->new,
+    ClaphamShopfronts::Schema::Result::Photo->new({taken_on => '2024-02-29'}),
+  );
+
+  for my $consumer (@consumers) {
+    is $consumer->display_date('2024-02-29'), '29 February 2024', ref($consumer) . ' formats a valid leap day';
+  }
+
+  is $consumers[-1]->photograph_date, '29 February 2024', 'photo formats its own capture date';
+  ok $consumers[2]->meta->is_immutable, 'migration class is immutable too';
+
+  for my $invalid (undef, '', '2026-4-03', '2025-02-29', '2026-04-31') {
+    try {
+      $consumers[0]->parse_date($invalid);
+      fail 'invalid or imprecise date rejected';
+    } catch ($error) {
+      ok length("$error"), 'invalid or imprecise date rejected';
+    }
+  }
+};
 
 done_testing;

@@ -6,11 +6,16 @@ use Moose;
 use Path::Tiny qw(path);
 use Template;
 use URI;
-use URI::Escape qw(uri_escape_utf8);
+use HTML::Entities qw(encode_entities);
+use JSON::MaybeXS qw(decode_json);
+use ClaphamShopfronts::PageMetadata;
 use ClaphamShopfronts::Schema;
-use ClaphamShopfronts::Util qw(read_json display_date web_url image_base html image_size validate_slug);
 
-with 'ClaphamShopfronts::Role::ProjectRoot';
+with qw(
+  ClaphamShopfronts::Role::ProjectRoot
+  ClaphamShopfronts::Role::Dates
+  ClaphamShopfronts::Role::WebURLs
+);
 
 my %STATUS = (
   occupied            => 'Occupied',
@@ -33,9 +38,9 @@ sub _build_tt ($self) {
     INCLUDE_PATH => "" . $self->root->child('templates'),
     ENCODING     => 'utf8',
     STRICT       => 1,
-    # Keep escaping identical across Template Toolkit releases and metadata.
+    # Keep content escaping consistent across Template Toolkit releases.
     FILTERS      => {
-      html => \&html,
+      html => sub ($value) { encode_entities($value // '', q{<>&"'}) },
     },
   });
 }
@@ -52,15 +57,17 @@ sub _page_data ($self, $fields, %options) {
   my $prefix = $options{prefix} // '';
 
   return {
-    title          => $fields->{title},
-    description    => $fields->{caption},
-    og_type        => 'website',
-    og_description => $fields->{og_description} // $fields->{caption},
-    social_image   => $fields->{social_image},
-    image_width    => $fields->{image_width},
-    image_height   => $fields->{image_height},
-    image_alt      => $fields->{image_alt} // $fields->{caption},
-    canonical      => $fields->{canonical},
+    seo => ClaphamShopfronts::PageMetadata->new(
+      og_title       => $fields->{title},
+      description    => $fields->{caption},
+      og_description => $fields->{og_description} // $fields->{caption},
+      og_url         => $fields->{canonical},
+      og_type        => 'website',
+      og_image       => $fields->{social_image},
+      og_image_alt   => $fields->{image_alt} // $fields->{caption},
+      image_width    => $fields->{image_width},
+      image_height   => $fields->{image_height},
+    ),
     prefix         => $prefix,
     home_url       => $prefix || './',
     body_class     => $options{body_class} // '',
@@ -69,57 +76,38 @@ sub _page_data ($self, $fields, %options) {
   };
 }
 
-sub photo_assets ($self, $photo, $base) {
-  my $filename = $photo->{filename};
+sub _image_base ($self, $value) {
+  $self->validate_web_url($value) unless $value =~ m{^/(?!/)};
 
-  die "Expected an image-root-relative WebP filename: $filename\n"
-    if $filename =~ m{^/|(?:^|/)\.\.(?:/|$)|\\} || $filename !~ /\.webp$/;
+  die "The image base must not include a query or fragment\n" if $value =~ /[?#]/;
 
-  (my $thumbnail = $filename) =~ s/\.webp$/-small.webp/;
-  my $images = $self->root->child('docs/images')->realpath;
-  my @sizes;
+  $value =~ s{/+$}{};
 
-  for my $relative ($filename, $thumbnail) {
-    my $file = $images->child($relative);
-
-    die "Published image not found: $relative\n" unless $file->is_file;
-    die "Image path leaves published directory\n" unless index("" . $file->realpath, "$images/") == 0;
-
-    push @sizes, image_size($file);
-  }
-
-  return {
-    image_url    => $base . uri_escape_utf8($filename, '^A-Za-z0-9\-._~/'),
-    small_url    => $base . uri_escape_utf8($thumbnail, '^A-Za-z0-9\-._~/'),
-    image_width  => $sizes[0][0],
-    image_height => $sizes[0][1],
-    small_width  => $sizes[1][0],
-    small_height => $sizes[1][1],
-  };
+  return "$value/";
 }
 
-sub history_date ($value) {
+sub history_date ($self, $value) {
   return $value if defined $value && $value =~ /^[1-9][0-9]{3}$/;
 
   if (defined $value && $value =~ /^[1-9][0-9]{3}-(?:0[1-9]|1[0-2])$/) {
-    my $display = display_date("$value-01");
+    my $display = $self->display_date("$value-01");
 
     $display =~ s/^1 //;
 
     return $display;
   }
 
-  return display_date($value);
+  return $self->display_date($value);
 }
 
-sub history ($publication, $photos) {
+sub history ($self, $publication, $photos) {
   my @events;
 
   for my $event (@{$publication->{reported_events} // []}) {
     push @events, {
       %$event,
-      display_date => history_date($event->{date}),
-      source_url   => $event->{source_url} ? web_url($event->{source_url}) : '',
+      display_date => $self->history_date($event->{date}),
+      source_url   => $event->{source_url} ? $self->validate_web_url($event->{source_url}) : '',
       source_label => $event->{source_label} // '',
       reported     => 1
     };
@@ -128,8 +116,8 @@ sub history ($publication, $photos) {
   for my $event (@{$publication->{sourced_events} // []}) {
     push @events, {
       %$event,
-      display_date => history_date($event->{date}),
-      source_url   => web_url($event->{source_url}),
+      display_date => $self->history_date($event->{date}),
+      source_url   => $self->validate_web_url($event->{source_url}),
       reported     => 0
     };
   }
@@ -137,7 +125,7 @@ sub history ($publication, $photos) {
   my %closed;
 
   for my $closure (@{$publication->{confirmed_closures} // []}) {
-    display_date($closure->{observed_on});
+    $self->parse_date($closure->{observed_on});
 
     my @matching = grep {
       $_->{taken_on} eq $closure->{observed_on}
@@ -243,7 +231,7 @@ sub _prepare_photographs ($self, $rows, $site, $page_url, $base) {
       observed_business_name => $observation ? $observation->observed_business_name : undef
     };
 
-    $photo->{photograph_date} = display_date($photo->{taken_on});
+    $photo->{photograph_date} = $row->photograph_date;
 
     die "Unrecognised observation state\n"
       if defined $photo->{observed_status} && !exists $STATUS{$photo->{observed_status}};
@@ -254,7 +242,7 @@ sub _prepare_photographs ($self, $rows, $site, $page_url, $base) {
       $business_name . ', ' . $site->street_address . ', photographed ' . $photo->{photograph_date} . '.';
     push @photos, {
       %$photo,
-      %{$self->photo_assets($photo, $base)},
+      %{$row->image_assets($self->root, $base)},
       page_url                 => $page_url . '#photo-' . $row->id,
       attribution              => $photo->{attribution} // '',
       business_name            => $business_name,
@@ -293,7 +281,7 @@ sub _source_links ($self, $photos) {
 
   for my $record (@$photos) {
     if (my $url = $record->{business_website}) {
-      web_url($url);
+      $self->validate_web_url($url);
 
       my $host = URI->new($url)->host;
 
@@ -306,7 +294,7 @@ sub _source_links ($self, $photos) {
 
     if ($record->{source_url} && !$seen{$record->{source_url}}++) {
       push @sources, {
-        url   => web_url($record->{source_url}),
+        url   => $self->validate_web_url($record->{source_url}),
         label => 'Original photograph source'
       };
     }
@@ -327,7 +315,7 @@ sub _unit_page_data ($self, $unit, $publication, $photos, $site_url, $page_url) 
     title          => $photo->{business_name} . ' — ' . $site->street_address . ' — Clapham Shopfronts',
     canonical      => "$site_url/$page_url",
     social_image   => $photo->{image_url} =~ m{^/} ? $site_url . $photo->{image_url} : $photo->{image_url},
-    history        => history($publication, $photos),
+    history        => $self->history($publication, $photos),
     source_links   => $self->_source_links($photos),
     main_photo     => $photo,
     earlier_photos => [@$photos[1 .. $#$photos]],
@@ -437,12 +425,12 @@ sub _apply_outputs ($self, $outputs, $check) {
 
 sub build ($self, %options) {
   my $root = $self->root;
-  my $config = read_json($root->child('data/site.json'));
-  my $site_url = web_url($config->{site_url});
+  my $config = decode_json($root->child('data/site.json')->slurp_raw);
+  my $site_url = $self->validate_web_url($config->{site_url});
 
   $site_url =~ s{/+$}{};
 
-  my $base = image_base($options{image_base} // $config->{image_base});
+  my $base = $self->_image_base($options{image_base} // $config->{image_base});
   my $home_path = $root->child('docs/index.html');
 
   my $schema = ClaphamShopfronts::Schema->connect_database($root->child('db/claphamshopfront.db'), read_only => 1);
@@ -452,7 +440,7 @@ sub build ($self, %options) {
     my $code = $publication->{unit_code};
     my $unit = $self->_load_unit($schema, $code);
     my $rows = $self->_load_photographs($schema, $unit);
-    my $page_url = 'shopfronts/' . validate_slug($unit->slug) . '/';
+    my $page_url = $unit->page_url;
     my $output = $root->child('docs', $page_url, 'index.html');
 
     die "Duplicate published unit: $code\n" if exists $outputs{"$output"};
